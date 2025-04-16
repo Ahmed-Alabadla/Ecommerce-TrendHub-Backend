@@ -1,0 +1,169 @@
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Like, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { JWTPayload, QueriesFindAllUsers } from 'src/utils/types';
+import { UserType } from 'src/utils/enums';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+
+    private readonly config: ConfigService,
+  ) {}
+
+  /**
+   * Creates a new user in the database.
+   * @param createUserDto  data for creating a new user
+   * @returns created user
+   */
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (existingUser) {
+      throw new BadRequestException('Email already exists!');
+    }
+    // Hash the password before saving
+    createUserDto.password = await this.hashPassword(createUserDto.password);
+
+    const user = this.usersRepository.create(createUserDto);
+    return await this.usersRepository.save(user);
+  }
+
+  /**
+   * Finds all users in the database.
+   * @returns list of users
+   */
+  async findAll(queries: QueriesFindAllUsers) {
+    const { name, email, role, page = '1', limit = '6' } = queries;
+
+    // Convert page string to number and throw BadRequestException if parasIntPage isNAN
+    const parasIntPage = parseInt(page);
+    if (isNaN(parasIntPage))
+      throw new BadRequestException('Page must be a number');
+
+    // Convert limit string to number and throw BadRequestException if parasIntLimit isNAN
+    const parasIntLimit = parseInt(limit);
+    if (isNaN(parasIntLimit))
+      throw new BadRequestException('Limit must be a number');
+
+    // Skip users
+    const skip = (parasIntPage - 1) * parasIntLimit;
+
+    // Filters data by name or email or role
+    const filters = {
+      ...(name ? { name: Like(`%${name}%`) } : {}),
+      ...(email ? { email: Like(`%${email}%`) } : {}),
+      ...(role ? { role: role as UserType } : {}),
+    };
+
+    const users = await this.usersRepository.find({
+      where: filters,
+      skip,
+      take: parasIntLimit,
+      order: { createAt: 'DESC' },
+    });
+    const totalUsers = await this.usersRepository.count();
+
+    const lastPage = Math.ceil(totalUsers / parasIntLimit);
+
+    const prev = parasIntPage <= 1 ? null : parasIntPage - 1;
+    const next = parasIntPage >= lastPage ? null : parasIntPage + 1;
+
+    return {
+      data: users,
+      links: {
+        first: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=1`,
+        last: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${lastPage}`,
+        prev:
+          prev === null
+            ? null
+            : `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${prev}`,
+        next:
+          next === null
+            ? null
+            : `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${next}`,
+      },
+      meta: {
+        current_page: parasIntPage,
+        per_page: parasIntLimit,
+        total: totalUsers,
+      },
+    };
+  }
+
+  /**
+   * Finds a user by ID in the database.
+   * @param id  user ID
+   * @returns  user with the specified ID
+   */
+  async findOne(id: number) {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    return user;
+  }
+
+  /**
+   * Updates a user by ID in the database.
+   * @param id  user ID
+   * @param updateUserDto  data for updating the user
+   * @returns updated user
+   */
+  async update(id: number, updateUserDto: UpdateUserDto, payload?: JWTPayload) {
+    const user = await this.findOne(id);
+
+    // Check if the user is active
+    if (user.isActive === false) {
+      throw new BadRequestException('User is not active!');
+    }
+
+    // hash the password if it is provided in the updateUserDto
+    if (updateUserDto.password) {
+      updateUserDto.password = await this.hashPassword(updateUserDto.password);
+    }
+
+    // Check if the user is trying to change their own role
+    if (payload && payload.id === id) {
+      throw new BadRequestException('You cannot change your own role');
+    }
+
+    // Merge new data
+    Object.assign(user, updateUserDto);
+
+    // Save the updated user
+    return await this.usersRepository.save(user);
+  }
+
+  /**
+   * Removes a user by ID from the database.
+   * @param id  user ID
+   * @returns confirmation message
+   */
+  async remove(id: number) {
+    const user = await this.findOne(id);
+    user.isActive = false;
+    await this.usersRepository.save(user);
+    return { message: 'User deleted successfully!' };
+  }
+
+  /**
+   * Hash password
+   * @param password password to hashed
+   * @returns hashed password
+   */
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
+  }
+}
