@@ -12,8 +12,14 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
 
+  app.enableCors({
+    origin: [process.env.APP_FRONTEND_URL, process.env.DASHBOARD_FRONTEND_URL],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
 
-  await app.listen(3000);
+  await app.listen(8000);
 }
 bootstrap();

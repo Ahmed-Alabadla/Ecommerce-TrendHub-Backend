@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -28,6 +30,11 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         };
       },
     }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
+    }),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -37,8 +44,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       ],
     }),
 
-    AuthModule,
     UsersModule,
+    AuthModule,
+    MailModule,
   ],
   providers: [
     {

@@ -13,7 +13,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JWTPayload, QueriesFindAllUsers } from 'src/utils/types';
+import { JWTPayload } from 'src/utils/types';
 import { AuthRolesGuard } from './guards/auth-roles.guard';
 import { Roles } from './decorators/user-role.decorator';
 import { UserType } from 'src/utils/enums';
@@ -43,8 +43,14 @@ export class AdminUsersController {
   @Roles(UserType.ADMIN)
   @UseGuards(AuthRolesGuard)
   @Get()
-  findAll(@Query() queries: QueriesFindAllUsers) {
-    return this.usersService.findAll(queries);
+  findAll(
+    @Query('name') name?: string,
+    @Query('email') email?: string,
+    @Query('role') role?: UserType,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.findAll(name, email, role, page, limit);
   }
 
   /**

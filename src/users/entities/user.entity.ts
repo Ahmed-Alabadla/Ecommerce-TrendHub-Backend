@@ -1,10 +1,12 @@
 import { Exclude } from 'class-transformer';
+import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import { GenderType, UserType } from 'src/utils/enums';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,10 +36,6 @@ export class User {
   @Exclude()
   verificationToken: string | null;
 
-  @Column({ nullable: true, type: 'varchar' })
-  @Exclude()
-  resetPasswordToken: string | null;
-
   @Column({ nullable: true, default: null })
   avatar: string;
 
@@ -66,6 +64,12 @@ export class User {
     onUpdate: CURRENT_TIMESTAMP,
   })
   updatedAt: Date;
+
+  @OneToMany(() => PasswordResetToken, (token) => token.user, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  passwordResetTokens: PasswordResetToken[];
 
   // @OneToMany(() => Review, (review) => review.user)
   // reviews: Review[];

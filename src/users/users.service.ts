@@ -7,9 +7,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { JWTPayload, QueriesFindAllUsers } from 'src/utils/types';
+import { JWTPayload } from 'src/utils/types';
 import { UserType } from 'src/utils/enums';
 import { ConfigService } from '@nestjs/config';
 
@@ -45,27 +45,35 @@ export class UsersService {
    * Finds all users in the database.
    * @returns list of users
    */
-  async findAll(queries: QueriesFindAllUsers) {
-    const { name, email, role, page = '1', limit = '6' } = queries;
-
+  async findAll(
+    name?: string,
+    email?: string,
+    role?: UserType,
+    page: string = '1',
+    limit: string = '6',
+  ) {
     // Convert page string to number and throw BadRequestException if parasIntPage isNAN
     const parasIntPage = parseInt(page);
-    if (isNaN(parasIntPage))
-      throw new BadRequestException('Page must be a number');
+    if (isNaN(parasIntPage) || parasIntPage < 1)
+      throw new BadRequestException('Page must be a positive number');
 
     // Convert limit string to number and throw BadRequestException if parasIntLimit isNAN
     const parasIntLimit = parseInt(limit);
-    if (isNaN(parasIntLimit))
-      throw new BadRequestException('Limit must be a number');
+    if (isNaN(parasIntLimit) || parasIntLimit < 1)
+      throw new BadRequestException('Limit must be a positive number');
 
-    // Skip users
+    // Check if limit exceeds 100
+    if (parasIntLimit > 100)
+      throw new BadRequestException('Limit cannot exceed 100');
+
+    // Calculate skip
     const skip = (parasIntPage - 1) * parasIntLimit;
 
     // Filters data by name or email or role
     const filters = {
-      ...(name ? { name: Like(`%${name}%`) } : {}),
-      ...(email ? { email: Like(`%${email}%`) } : {}),
-      ...(role ? { role: role as UserType } : {}),
+      ...(name ? { name: ILike(`%${name}%`) } : {}),
+      ...(email ? { email: ILike(`%${email}%`) } : {}),
+      ...(role ? { role: role.toLowerCase() as UserType } : {}),
     };
 
     const users = await this.usersRepository.find({
@@ -74,9 +82,11 @@ export class UsersService {
       take: parasIntLimit,
       order: { createAt: 'DESC' },
     });
-    const totalUsers = await this.usersRepository.count();
+    const totalFilteredUsers = await this.usersRepository.count({
+      where: filters,
+    }); // Count WITH filters
 
-    const lastPage = Math.ceil(totalUsers / parasIntLimit);
+    const lastPage = Math.ceil(totalFilteredUsers / parasIntLimit);
 
     const prev = parasIntPage <= 1 ? null : parasIntPage - 1;
     const next = parasIntPage >= lastPage ? null : parasIntPage + 1;
@@ -86,19 +96,18 @@ export class UsersService {
       links: {
         first: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=1`,
         last: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${lastPage}`,
-        prev:
-          prev === null
-            ? null
-            : `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${prev}`,
-        next:
-          next === null
-            ? null
-            : `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${next}`,
+        prev: prev
+          ? `${this.config.get('DOMAIN')}/api/admin/users?page=${prev}`
+          : null,
+        next: next
+          ? `${this.config.get('DOMAIN')}/api/admin/users?page=${next}`
+          : null,
       },
       meta: {
         current_page: parasIntPage,
         per_page: parasIntLimit,
-        total: totalUsers,
+        total: totalFilteredUsers,
+        last_page: lastPage,
       },
     };
   }
