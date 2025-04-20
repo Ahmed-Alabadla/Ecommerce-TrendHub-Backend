@@ -1,0 +1,82 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
+import { UserType } from 'src/utils/enums';
+import { Roles } from 'src/users/decorators/user-role.decorator';
+
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  /**
+   * @method POST
+   * @route ~/api/categories
+   * @access Private [Admin]
+   */
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.ADMIN)
+  @Post()
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoriesService.create(createCategoryDto);
+  }
+
+  /**
+   * @method GET
+   * @route ~/api/categories
+   * @access Public
+   */
+  @Get()
+  findAll(@Query('slug') slug: string) {
+    return this.categoriesService.findAll(slug);
+  }
+
+  /**
+   * @method GET
+   * @route ~/api/categories/:id
+   * @access Public
+   */
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.findOne(id);
+  }
+
+  /**
+   * @method PATCH
+   * @route ~/api/categories/:id
+   * @access Private [Admin]
+   */
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.ADMIN)
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    return this.categoriesService.update(id, updateCategoryDto);
+  }
+
+  /**
+   * @method DELETE
+   * @route ~/api/categories/:id
+   * @access Private [Admin]
+   */
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.ADMIN)
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.remove(id);
+  }
+}
