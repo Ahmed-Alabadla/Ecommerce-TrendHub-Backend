@@ -6,14 +6,14 @@ import {
   Length,
 } from 'class-validator';
 
-export class CreateCategoryDto {
-  @IsNotEmpty()
+export class CreateBrandDto {
   @IsString()
+  @IsNotEmpty()
   @Length(3, 50)
   name: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   @Length(3, 50)
   slug: string;
 

@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailModule } from './mail/mail.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
+import { BrandsModule } from './brands/brands.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
     MailModule,
     CategoriesModule,
     SubCategoriesModule,
+    BrandsModule,
   ],
   providers: [
     {

@@ -61,10 +61,13 @@ export class SubCategoriesService {
 
   /**
    * Finds all sub-categories in database
+   * @param slug Finds sub-categories by slug
    * @returns list of sub-categories
    */
-  async findAll() {
+  async findAll(slug?: string) {
     const subCategories = await this.subCategoryRepository.find({
+      relations: ['category'],
+      where: { slug: slug?.toLowerCase() },
       order: { createAt: 'DESC' },
     });
     return subCategories;
@@ -77,6 +80,7 @@ export class SubCategoriesService {
    */
   async findOne(id: number) {
     const subCategory = await this.subCategoryRepository.findOne({
+      relations: ['category'],
       where: { id },
     });
     if (!subCategory)

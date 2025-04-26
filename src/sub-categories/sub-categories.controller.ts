@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { SubCategoriesService } from './sub-categories.service';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
@@ -38,8 +39,8 @@ export class SubCategoriesController {
    * @access Public
    */
   @Get()
-  findAll() {
-    return this.subCategoriesService.findAll();
+  findAll(@Query('slug') slug: string) {
+    return this.subCategoriesService.findAll(slug);
   }
 
   /**

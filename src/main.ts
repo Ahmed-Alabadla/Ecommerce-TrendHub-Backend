@@ -13,7 +13,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: [process.env.APP_FRONTEND_URL, process.env.DASHBOARD_FRONTEND_URL],
+    origin: [process.env.APP_FRONTEND_URL, process.env.DASHBOARD_FRONTEND_URL , "https://ecommerce-trendhub-dashboard.vercel.app"],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

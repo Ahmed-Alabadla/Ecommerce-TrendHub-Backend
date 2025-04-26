@@ -50,7 +50,7 @@ export class UsersService {
     email?: string,
     role?: UserType,
     page: string = '1',
-    limit: string = '6',
+    limit: string = '5',
   ) {
     // Convert page string to number and throw BadRequestException if parasIntPage isNAN
     const parasIntPage = parseInt(page);
@@ -86,23 +86,14 @@ export class UsersService {
       where: filters,
     }); // Count WITH filters
 
-    const lastPage = Math.ceil(totalFilteredUsers / parasIntLimit);
-
-    const prev = parasIntPage <= 1 ? null : parasIntPage - 1;
-    const next = parasIntPage >= lastPage ? null : parasIntPage + 1;
+    const lastPage =
+      Math.ceil(totalFilteredUsers / parasIntLimit) === 0
+        ? 1
+        : Math.ceil(totalFilteredUsers / parasIntLimit);
 
     return {
       data: users,
-      links: {
-        first: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=1`,
-        last: `${this.config.get<string>('DOMAIN')}/api/admin/users?page=${lastPage}`,
-        prev: prev
-          ? `${this.config.get('DOMAIN')}/api/admin/users?page=${prev}`
-          : null,
-        next: next
-          ? `${this.config.get('DOMAIN')}/api/admin/users?page=${next}`
-          : null,
-      },
+
       meta: {
         current_page: parasIntPage,
         per_page: parasIntLimit,
