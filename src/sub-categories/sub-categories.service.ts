@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -100,6 +104,18 @@ export class SubCategoriesService {
 
     if (updateSubCategoryDto.slug)
       updateSubCategoryDto.slug = updateSubCategoryDto.slug.toLowerCase();
+
+    if (updateSubCategoryDto.categoryId) {
+      const category = await this.categoryRepository.findOne({
+        where: { id: updateSubCategoryDto.categoryId },
+      });
+      if (!category)
+        throw new NotFoundException(
+          `Category with ID ${updateSubCategoryDto.categoryId} not found`,
+        );
+
+      subCategory.category = category;
+    }
 
     Object.assign(subCategory, updateSubCategoryDto);
 
