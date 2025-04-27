@@ -10,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { BrandsModule } from './brands/brands.module';
+import { CouponsModule } from './coupons/coupons.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BrandsModule } from './brands/brands.module';
     CategoriesModule,
     SubCategoriesModule,
     BrandsModule,
+    CouponsModule,
   ],
   providers: [
     {

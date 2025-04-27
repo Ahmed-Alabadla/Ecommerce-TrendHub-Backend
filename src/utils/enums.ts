@@ -7,3 +7,8 @@ export enum GenderType {
   MALE = 'male',
   FEMALE = 'female',
 }
+
+export enum CouponType {
+  PERCENTAGE = 'percentage',
+  FIXED = 'fixed',
+}
