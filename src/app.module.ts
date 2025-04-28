@@ -12,6 +12,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { BrandsModule } from './brands/brands.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -32,6 +33,8 @@ import { SuppliersModule } from './suppliers/suppliers.module';
           synchronize: process.env.NODE_ENV !== 'production',
           entities: ['dist/**/*.entity{.ts,.js}'],
           // entities: [Product, User, Review],
+          logging: true, // enable logging
+          logger: 'advanced-console', // more detailed logging
         };
       },
     }),
@@ -57,6 +60,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     BrandsModule,
     CouponsModule,
     SuppliersModule,
+    ProductsModule,
   ],
   providers: [
     {

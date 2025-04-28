@@ -1,10 +1,12 @@
 import { Category } from 'src/categories/entities/category.entity';
+import { Product } from 'src/products/entities/product.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -20,11 +22,6 @@ export class SubCategory {
   @Column({ type: 'varchar', length: 50, unique: true })
   slug: string;
 
-  @ManyToOne(() => Category, (category) => category.subCategories, {
-    onDelete: 'SET NULL',
-  })
-  category: Category;
-
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
   createAt: Date;
 
@@ -34,4 +31,14 @@ export class SubCategory {
     onUpdate: CURRENT_TIMESTAMP,
   })
   updatedAt: Date;
+
+  // ============ Relations ============
+
+  @ManyToOne(() => Category, (category) => category.subCategories, {
+    onDelete: 'SET NULL',
+  })
+  category: Category;
+
+  @OneToMany(() => Product, (product) => product.subCategory)
+  products: Product[];
 }

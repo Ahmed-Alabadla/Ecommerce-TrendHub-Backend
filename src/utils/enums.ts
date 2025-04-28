@@ -12,3 +12,9 @@ export enum CouponType {
   PERCENTAGE = 'percentage',
   FIXED = 'fixed',
 }
+
+export enum ProductStatus {
+  ACTIVE = 'Active',
+  OUT_OF_STOCK = 'OutOfStock',
+  DISCONTINUED = 'Discontinued',
+}

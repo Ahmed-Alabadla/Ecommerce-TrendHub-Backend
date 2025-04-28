@@ -1,8 +1,10 @@
+import { Product } from 'src/products/entities/product.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -30,4 +32,9 @@ export class Brand {
     onUpdate: CURRENT_TIMESTAMP,
   })
   updatedAt: Date;
+
+  // ============= Relations =============
+
+  @OneToMany(() => Product, (product) => product.brand)
+  products: Product[];
 }

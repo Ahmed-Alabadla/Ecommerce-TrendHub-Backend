@@ -1,3 +1,4 @@
+import { Product } from 'src/products/entities/product.entity';
 import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import {
@@ -23,9 +24,6 @@ export class Category {
   @Column({ nullable: true, default: null })
   image: string;
 
-  @OneToMany(() => SubCategory, (subCategory) => subCategory.category)
-  subCategories: SubCategory[];
-
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
   createAt: Date;
 
@@ -35,4 +33,12 @@ export class Category {
     onUpdate: CURRENT_TIMESTAMP,
   })
   updatedAt: Date;
+
+  // ============= Relations =============
+
+  @OneToMany(() => SubCategory, (subCategory) => subCategory.category)
+  subCategories: SubCategory[];
+
+  @OneToMany(() => Product, (product) => product.category)
+  products: Product[];
 }
