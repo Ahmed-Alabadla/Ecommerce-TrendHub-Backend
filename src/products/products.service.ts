@@ -121,6 +121,7 @@ export class ProductsService {
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.subCategory', 'subCategory')
       .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.reviews', 'reviews')
       .select([
         'product',
         'category.id',
@@ -132,16 +133,17 @@ export class ProductsService {
         'brand.id',
         'brand.name',
         'brand.slug',
+        // 'reviews',
       ])
-      // .addSelect('COUNT(reviews.id)', 'ratingsQuantity')
-      // .addSelect('AVG(reviews.rating)', 'averageRating')
-      .groupBy('product.id, category.id, subCategory.id, brand.id');
+
+      .groupBy('product.id, category.id, subCategory.id, brand.id, reviews.id');
 
     // Filter by search term
     if (search) {
       query.andWhere(
-        '(product.name ILIKE :search OR product.description ILIKE :search)',
-        { search: `%${search}%` },
+        `to_tsvector('english', product.name) @@ to_tsquery('english', :search) OR 
+         to_tsvector('english', product.description) @@ to_tsquery('english', :search)`,
+        { search: `${search}:*` },
       );
     }
 
@@ -197,22 +199,22 @@ export class ProductsService {
     if (price_lte) query.andWhere('product.price <= :price_lte', { price_lte });
 
     // Filter by rating average
-    // if (ratingAverage_gt)
-    //   query.andHaving('AVG(reviews.rating) > :ratingAverage_gt', {
-    //     ratingAverage_gt,
-    //   });
-    // if (ratingAverage_gte)
-    //   query.andHaving('AVG(reviews.rating) >= :ratingAverage_gte', {
-    //     ratingAverage_gte,
-    //   });
-    // if (ratingAverage_lt)
-    //   query.andHaving('AVG(reviews.rating) < :ratingAverage_lt', {
-    //     ratingAverage_lt,
-    //   });
-    // if (ratingAverage_lte)
-    //   query.andHaving('AVG(reviews.rating) <= :ratingAverage_lte', {
-    //     ratingAverage_lte,
-    //   });
+    if (ratingAverage_gt)
+      query.andHaving('AVG(reviews.rating) > :ratingAverage_gt', {
+        ratingAverage_gt,
+      });
+    if (ratingAverage_gte)
+      query.andHaving('AVG(reviews.rating) >= :ratingAverage_gte', {
+        ratingAverage_gte,
+      });
+    if (ratingAverage_lt)
+      query.andHaving('AVG(reviews.rating) < :ratingAverage_lt', {
+        ratingAverage_lt,
+      });
+    if (ratingAverage_lte)
+      query.andHaving('AVG(reviews.rating) <= :ratingAverage_lte', {
+        ratingAverage_lte,
+      });
 
     // Filter by status
     if (!includeInactive) {
@@ -222,11 +224,6 @@ export class ProductsService {
     }
 
     // Sorting
-    // if (sortBy === 'ratingAverage') {
-    //   query.orderBy('averageRating', sortOrder.toUpperCase() as 'ASC' | 'DESC');
-    // } else {
-    // }
-
     query.orderBy(
       `product.${sortBy}`,
       sortOrder.toUpperCase() as 'ASC' | 'DESC',
@@ -236,24 +233,19 @@ export class ProductsService {
     const offset = (page - 1) * limit;
     query.skip(offset).take(limit);
 
-    try {
-      const [products, total] = await query.getManyAndCount();
-      const totalPages =
-        Math.ceil(total / limit) === 0 ? 1 : Math.ceil(total / limit);
+    const [products, total] = await query.getManyAndCount();
+    const totalPages =
+      Math.ceil(total / limit) === 0 ? 1 : Math.ceil(total / limit);
 
-      return {
-        data: products,
-        meta: {
-          current_page: page,
-          per_page: limit,
-          total,
-          last_page: totalPages,
-        },
-      };
-    } catch (error) {
-      console.error('Error in findAll:', error);
-      throw error;
-    }
+    return {
+      data: products,
+      meta: {
+        current_page: page,
+        per_page: limit,
+        total,
+        last_page: totalPages,
+      },
+    };
   }
 
   /**

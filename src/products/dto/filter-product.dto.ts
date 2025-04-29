@@ -95,7 +95,7 @@ export class ProductFilterDto {
   ratingAverage_lte?: number;
 
   @IsOptional()
-  @IsIn(['price', 'sold', 'ratingAverage', 'createAt'])
+  @IsIn(['price', 'sold', 'ratingsAverage', 'createAt'])
   sortBy?: string = 'createAt';
 
   @IsOptional()

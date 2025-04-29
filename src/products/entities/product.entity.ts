@@ -8,10 +8,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Dimensions } from './dimensions.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 
 @Entity({ name: 'products' })
 export class Product {
@@ -55,7 +57,7 @@ export class Product {
     name: 'ratings_average',
     type: 'decimal',
     precision: 3,
-    scale: 2,
+    scale: 1,
     default: 0,
   })
   ratingsAverage: number;
@@ -105,6 +107,9 @@ export class Product {
   })
   brand: Brand;
 
+  @OneToMany(() => Review, (review) => review.product)
+  reviews: Review[];
+
   // ============= Methods =============
   updateStock(quantitySold: number): void {
     this.quantity -= quantitySold;
@@ -113,18 +118,4 @@ export class Product {
       this.status = ProductStatus.OUT_OF_STOCK;
     }
   }
-
-  calculateDiscount(discount: number): void {
-    // Assuming discount is a percentage
-    this.priceAfterDiscount = this.price - (this.price * discount) / 100;
-  }
-
-  // calculateAverageRating():void{
-  //   if(this.reviews && this.reviews.length >0){
-  //     const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
-
-  //     this.ratingsAverage = sum / this.reviews.length;
-  //     this.ratingsQuantity = this.reviews.length;
-  //   }
-  // }
 }

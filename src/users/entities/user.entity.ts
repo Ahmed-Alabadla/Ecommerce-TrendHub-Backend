@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import { GenderType, UserType } from 'src/utils/enums';
 import {
@@ -65,12 +66,14 @@ export class User {
   })
   updatedAt: Date;
 
+  // ============ Relations ============
+
   @OneToMany(() => PasswordResetToken, (token) => token.user, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   passwordResetTokens: PasswordResetToken[];
 
-  // @OneToMany(() => Review, (review) => review.user)
-  // reviews: Review[];
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 }
