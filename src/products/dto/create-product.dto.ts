@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsEnum,
+  IsHexColor,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -14,6 +15,7 @@ import {
 } from 'class-validator';
 import { ProductStatus } from 'src/utils/enums';
 import { Dimensions } from '../entities/dimensions.entity';
+import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
   @IsString()
@@ -49,8 +51,14 @@ export class CreateProductDto {
   images: string[];
 
   @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
+  @IsHexColor({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((color: string) =>
+          color.startsWith('#') ? color : `#${color}`,
+        )
+      : ([] as string[]),
+  )
   colors: string[];
 
   @IsNumber()

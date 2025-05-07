@@ -47,7 +47,17 @@ export class Product {
   @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
   images: string[];
 
-  @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
+  // @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
+  // colors: string[];
+  @Column({
+    type: 'text',
+    array: true,
+    default: [],
+    transformer: {
+      to: (value: string[]) => value, // No transformation when saving
+      from: (value: string[]) => value.map((v) => v.trim()), // Ensure clean values when reading
+    },
+  })
   colors: string[];
 
   @Column({ default: 0 })
