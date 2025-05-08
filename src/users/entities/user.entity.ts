@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
+import { Cart } from 'src/carts/entities/cart.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import { GenderType, UserType } from 'src/utils/enums';
@@ -8,6 +9,7 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -76,4 +78,7 @@ export class User {
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
+
+  @OneToOne(() => Cart, (cart) => cart.user)
+  cart: Cart;
 }

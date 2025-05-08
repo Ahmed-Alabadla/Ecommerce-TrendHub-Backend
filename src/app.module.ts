@@ -14,6 +14,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { ProductsModule } from './products/products.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { CartsModule } from './carts/carts.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     SuppliersModule,
     ProductsModule,
     ReviewsModule,
+    CartsModule,
   ],
   providers: [
     {
