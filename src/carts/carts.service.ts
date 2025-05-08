@@ -201,7 +201,8 @@ export class CartsService {
    */
   async findAllCarts() {
     const carts = await this.cartsRepository.find({
-      relations: ['cartItems', 'cartItems.product', 'user'],
+      relations: ['cartItems', 'cartItems.product', 'user', 'coupon'],
+      order: { updatedAt: 'DESC' },
     });
     return carts;
   }

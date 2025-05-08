@@ -15,6 +15,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { ProductsModule } from './products/products.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CartsModule } from './carts/carts.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CartsModule } from './carts/carts.module';
     ProductsModule,
     ReviewsModule,
     CartsModule,
+    SettingsModule,
   ],
   providers: [
     {
