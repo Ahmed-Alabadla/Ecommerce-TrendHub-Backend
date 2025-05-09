@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { JWTPayload } from 'src/utils/types';
 import { UserType } from 'src/utils/enums';
 import { ConfigService } from '@nestjs/config';
 
@@ -120,22 +119,12 @@ export class UsersService {
    * @param updateUserDto  data for updating the user
    * @returns updated user
    */
-  async update(id: number, updateUserDto: UpdateUserDto, payload?: JWTPayload) {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
     // Check if the user is active
     if (user.isActive === false) {
       throw new BadRequestException('User is not active!');
-    }
-
-    // hash the password if it is provided in the updateUserDto
-    if (updateUserDto.password) {
-      updateUserDto.password = await this.hashPassword(updateUserDto.password);
-    }
-
-    // Check if the user is trying to change their own role
-    if (payload && payload.id === id) {
-      throw new BadRequestException('You cannot change your own role');
     }
 
     // Merge new data

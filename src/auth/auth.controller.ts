@@ -6,8 +6,10 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -15,6 +17,12 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Request } from 'express';
+import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
+import { UserType } from 'src/utils/enums';
+import { Roles } from 'src/users/decorators/user-role.decorator';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { CurrentUser } from 'src/users/decorators/current-user.decorator';
+import { JWTPayload } from 'src/utils/types';
 
 @Controller('auth')
 export class AuthController {
@@ -97,5 +105,20 @@ export class AuthController {
     @Param('verificationToken') verificationToken: string,
   ) {
     return this.authService.verifyEmail(id, verificationToken);
+  }
+
+  /**
+   * @method PATCH
+   * @route ~/api/auth/change-password
+   * @access Private {Admin, Customer} logged in system
+   */
+  @Patch('change-password')
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.ADMIN, UserType.CUSTOMER)
+  changePassword(
+    @Body() body: ChangePasswordDto,
+    @CurrentUser() payload: JWTPayload,
+  ) {
+    return this.authService.changePassword(body, payload.id);
   }
 }

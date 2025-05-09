@@ -6,9 +6,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { MailModule } from 'src/mail/mail.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, PasswordResetToken]), MailModule],
+  imports: [
+    TypeOrmModule.forFeature([User, PasswordResetToken]),
+    MailModule,
+    UsersModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService],
 })

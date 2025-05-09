@@ -1,8 +1,10 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { MailService } from './../mail/mail.service';
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -248,6 +250,32 @@ export class AuthService {
 
     //  Delete all user's reset tokens
     await this.passwordResetTokenRepository.delete({ user: resetToken.user });
+
+    return { message: 'Password updated successfully' };
+  }
+
+  /**
+   * Change password when user logged in system
+   * @param changePasswordDto data for change password to user account
+   * @param userId  id of user logged
+   * @returns message successfully
+   */
+  async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with Id ${userId} not found!`);
+    }
+
+    const isMatchPassword = await bcrypt.compare(
+      changePasswordDto.oldPassword,
+      user.password,
+    );
+
+    if (!isMatchPassword) throw new BadRequestException('Invalid password!');
+
+    user.password = await this.hashPassword(changePasswordDto.newPassword);
+
+    await this.usersRepository.save(user);
 
     return { message: 'Password updated successfully' };
   }

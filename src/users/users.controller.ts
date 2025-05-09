@@ -121,7 +121,7 @@ export class NormalUsersController {
     @CurrentUser() payload: JWTPayload,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update(payload.id, updateUserDto, payload);
+    return this.usersService.update(payload.id, updateUserDto);
   }
 
   /**
