@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Order Confirmation - <%= siteName %></title>
+    <style>
+        /* Reset styles for email clients */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        /* Prevent WebKit and Windows mobile from changing default text sizes */
+        body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f8f8;
+        }
+        
+        /* Force Outlook to provide a "view in browser" message */
+        #outlook a {
+            padding: 0;
+        }
+        
+        /* Force Hotmail to display emails at full width */
+        .ReadMsgBody {
+            width: 100%;
+        }
+        
+        .ExternalClass {
+            width: 100%;
+        }
+        
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {
+            line-height: 100%;
+        }
+        
+        /* Main container styles */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Header styles */
+        .header {
+            background-color: #f9f9f9;
+            text-align: center;
+            padding: 25px 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        
+        .logo {
+            max-width: 180px;
+            height: auto;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        /* Main content styles */
+        .content {
+            padding: 30px 20px;
+        }
+        
+        /* Order details */
+        .order-details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+        
+        .order-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+        
+        /* Status badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #FFA500;
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+        
+        .paid-badge {
+            background-color: #4CAF50;
+        }
+        
+        /* Customer info boxes */
+        .info-boxes {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 25px;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+        
+        .info-box {
+            display: table-cell;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            width: 50%;
+            vertical-align: top;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        /* Product table */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .product-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        
+        .product-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 14px;
+        }
+        
+        .product-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border: 1px solid #eeeeee;
+        }
+        
+        .product-details {
+            margin-left: 15px;
+            vertical-align: top;
+        }
+        
+        /* Totals section */
+        .totals-container {
+            margin-top: 25px;
+        }
+        
+        .totals {
+            width: 250px;
+            float: right;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .totals-table td {
+            padding: 5px 0;
+        }
+        
+        .totals-table tr.total-row {
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px solid #dddddd;
+            padding-top: 10px;
+        }
+        
+        .totals-table tr.total-row td {
+            padding-top: 10px;
+        }
+        
+        .totals-table td:last-child {
+            text-align: right;
+        }
+        
+        /* Footer */
+        .footer {
+            clear: both;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #777777;
+            padding: 20px;
+            border-top: 1px solid #eeeeee;
+            background-color: #f9f9f9;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #eeeeee;
+            margin: 30px 0;
+        }
+        
+        /* Call to action button */
+        .cta-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        /* Responsive styles */
+        @media screen and (max-width: 600px) {
+            .info-boxes {
+                display: block;
+            }
+            
+            .info-box {
+                display: block;
+                width: auto;
+                margin-bottom: 15px;
+            }
+            
+            .totals {
+                width: 100%;
+                float: none;
+                box-sizing: border-box;
+            }
+            
+            .product-table th:nth-child(2), 
+            .product-table td:nth-child(2) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="padding: 20px;">
+        <div class="container">
+            <div class="header">
+                <% if (logoUrl) { %>
+                    <img src="<%= logoUrl %>" alt="<%= siteName %> Logo" class="logo">
+                <% } else { %>
+                    <h1 style="margin: 0; color: #333333;"><%= siteName %></h1>
+                <% } %>
+                <h2 style="margin: 10px 0; color: #4CAF50;">Order Confirmation</h2>
+                <p style="margin-bottom: 0;">Thank you for your purchase, <%= order.user.name %>!</p>
+            </div>
+
+            <div class="content">
+                <div class="order-details">
+                    <h2 class="order-number">
+                        Order #<%= order.orderNumber %>
+                        <span class="status-badge <%= order.isPaid ? 'paid-badge' : '' %>">
+                            <%= order.status %> <%= order.isPaid ? '(Paid)' : '' %>
+                        </span>
+                    </h2>
+                    <p style="margin: 5px 0;">
+                        <strong>Placed on:</strong> <%= new Date(order.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) %>
+                    </p>
+                    <% if (order.isPaid && order.paidAt) { %>
+                        <p style="margin: 5px 0;">
+                            <strong>Paid on:</strong> <%= new Date(order.paidAt).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }) %>
+                        </p>
+                    <% } %>
+                </div>
+
+                <!-- Customer and Order Information -->
+                <table class="info-boxes">
+                    <tr>
+                        <td class="info-box">
+                            <h3>Customer Information</h3>
+                            <p style="margin: 5px 0;"><strong>Name:</strong> <%= order.user.name %></p>
+                            <p style="margin: 5px 0;"><strong>Email:</strong> <%= order.user.email %></p>
+                            <% if (order.user.phone) { %>
+                                <p style="margin: 5px 0;"><strong>Phone:</strong> <%= order.user.phone %></p>
+                            <% } %>
+                            <% if (order.user.address) { %>
+                                <p style="margin: 5px 0;"><strong>Address:</strong> <%= order.user.address %></p>
+                            <% } %>
+                        </td>
+                        <td class="info-box">
+                            <h3>Order Information</h3>
+                            <p style="margin: 5px 0;"><strong>Shipping Address:</strong> <%= order.shippingAddress %></p>
+                            <p style="margin: 5px 0;"><strong>Payment Method:</strong> 
+                                <span style="text-transform: capitalize;"><%= order.paymentMethodType %></span>
+                            </p>
+                            <% if (order.stripeCheckoutId) { %>
+                                <p style="margin: 5px 0;"><strong>Transaction ID:</strong> 
+                                    <span style="font-size: 13px;"><%= order.stripeCheckoutId %></span>
+                                </p>
+                            <% } %>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Tracking info if available -->
+                <% if (order.isDelivered) { %>
+                <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 25px;">
+                    <h3 style="margin-top: 0; color: #2e7d32;">Shipping Information</h3>
+                    <p style="margin: 5px 0;"><strong>Status:</strong> 
+                        <%= order.isDelivered ? 'Shipped' : 'Processing' %>
+                    </p>
+                </div>
+                <% } %>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #eeeeee; padding-bottom: 10px;">Order Items</h3>
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% order.orderItems.forEach(item => { 
+                            const itemPrice = Number(item.product.priceAfterDiscount) > 0 ? 
+                                parseFloat(item.product.priceAfterDiscount) : 
+                                parseFloat(item.product.price);
+                            const itemTotal = itemPrice * item.quantity;
+                        %>
+                            <tr>
+                                <td>
+                                    <table style="border-collapse: collapse;">
+                                        <tr>
+                                            <td style="vertical-align: top; padding: 0;">
+                                                <% const imageUrl = item.product.imageCover; %>
+                                                <% if (imageUrl && imageUrl.startsWith('http')) { %>
+                                                    <img src="<%= imageUrl %>" alt="<%= item.product.name %>" class="product-image">
+                                                <% } else { %>
+                                                    <div style="width: 70px; height: 70px; background-color: #f2f2f2; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; text-align: center;">
+                                                        Product<br>Image
+                                                    </div>
+                                                <% } %>
+                                            </td>
+                                            <td style="vertical-align: top; padding-left: 15px;">
+                                                <div style="font-weight: bold; margin-bottom: 5px;"><%= item.product.name %></div>
+                                                <% if (item.product.description) { %>
+                                                    <div style="font-size: 13px; color: #777777;">
+                                                        <%= item.product.description.length > 50 ? 
+                                                            item.product.description.substring(0, 50) + '...' : 
+                                                            item.product.description %>
+                                                    </div>
+                                                <% } %>
+                                                
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>$<%= itemPrice.toFixed(2) %></td>
+                                <td><%= item.quantity %></td>
+                                <td><strong>$<%= itemTotal.toFixed(2) %></strong></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+
+                <div class="totals-container">
+                    <div class="totals">
+                        <table class="totals-table">
+                            <tr>
+                                <td>Subtotal:</td>
+                                <td>$<%= (order.totalOrderPrice - order.shippingPrice - order.taxPrice).toFixed(2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Shipping:</td>
+                                <td>$<%= parseFloat(order.shippingPrice).toFixed(2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Tax:</td>
+                                <td>$<%= parseFloat(order.taxPrice).toFixed(2) %></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Total:</td>
+                                <td>$<%= parseFloat(order.totalOrderPrice).toFixed(2) %></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="margin-top: 0;">What's Next?</h3>
+                    <ol style="padding-left: 20px;">
+                        <li>Your order has been received and is now being processed.</li>
+                        <li>You'll receive a shipping confirmation email once your order ships.</li>
+                        <li>You can track your order status anytime by logging into your account.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>If you have any questions about your order, please contact our customer service at <a href="mailto:<%= supportEmail %>"><%= supportEmail %></a> or call us at <%= supportPhone %>.</p>
+                <p>&copy; <%= new Date().getFullYear() %> <%= siteName %>. All rights reserved.</p>
+                <p style="font-size: 12px; color: #999999;">
+                    This email was sent to <%= order.user.email %> because you made a purchase at <%= siteName %>.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
