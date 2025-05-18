@@ -18,13 +18,8 @@ export class CartItem {
   @Column({ default: 1 })
   quantity: number;
 
-  @Column({
-    nullable: true,
-  })
-  color: string;
-
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',

@@ -9,6 +9,11 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +23,7 @@ import { AuthRolesGuard } from './guards/auth-roles.guard';
 import { Roles } from './decorators/user-role.decorator';
 import { UserType } from 'src/utils/enums';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('admin/users')
 export class AdminUsersController {
@@ -30,9 +36,22 @@ export class AdminUsersController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('avatar'))
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.usersService.create(createUserDto, file);
   }
 
   /**
@@ -72,12 +91,23 @@ export class AdminUsersController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('avatar'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, file);
   }
 
   /**
@@ -116,12 +146,23 @@ export class NormalUsersController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN, UserType.CUSTOMER)
+  @UseInterceptors(FileInterceptor('avatar'))
   @Patch()
   update(
     @CurrentUser() payload: JWTPayload,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    return this.usersService.update(payload.id, updateUserDto);
+    return this.usersService.update(payload.id, updateUserDto, file);
   }
 
   /**

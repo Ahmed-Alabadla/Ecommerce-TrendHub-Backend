@@ -39,7 +39,7 @@ export class CouponsService {
    */
   async findAll() {
     const coupons = await this.couponsRepository.find({
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
     return coupons;
   }

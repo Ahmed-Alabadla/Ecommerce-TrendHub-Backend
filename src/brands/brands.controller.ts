@@ -8,6 +8,11 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
@@ -15,6 +20,7 @@ import { UpdateBrandDto } from './dto/update-brand.dto';
 import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
 import { Roles } from 'src/users/decorators/user-role.decorator';
 import { UserType } from 'src/utils/enums';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('brands')
 export class BrandsController {
@@ -27,9 +33,22 @@ export class BrandsController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Post()
-  create(@Body() createBrandDto: CreateBrandDto) {
-    return this.brandsService.create(createBrandDto);
+  create(
+    @Body() createBrandDto: CreateBrandDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.brandsService.create(createBrandDto, file);
   }
 
   /**
@@ -59,12 +78,23 @@ export class BrandsController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBrandDto: UpdateBrandDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    return this.brandsService.update(id, updateBrandDto);
+    return this.brandsService.update(id, updateBrandDto, file);
   }
 
   /**

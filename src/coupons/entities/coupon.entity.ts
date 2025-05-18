@@ -32,7 +32,7 @@ export class Coupon {
   currentUsage: number;
 
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',

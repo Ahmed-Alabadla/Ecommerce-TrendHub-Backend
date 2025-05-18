@@ -86,7 +86,7 @@ export class ReviewsService {
     const [reviews, total] = await this.reviewsRepository.findAndCount({
       where: filters,
       relations: ['product', 'user'],
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
       take: limit,
       skip,
     });

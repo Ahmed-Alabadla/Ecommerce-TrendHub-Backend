@@ -1,3 +1,4 @@
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   Controller,
   Get,
@@ -9,6 +10,11 @@ import {
   UseGuards,
   ParseIntPipe,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -28,9 +34,22 @@ export class CategoriesController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.categoriesService.create(createCategoryDto, file);
   }
 
   /**
@@ -60,12 +79,23 @@ export class CategoriesController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+    return this.categoriesService.update(id, updateCategoryDto, file);
   }
 
   /**

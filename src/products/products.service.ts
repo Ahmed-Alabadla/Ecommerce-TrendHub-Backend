@@ -13,6 +13,7 @@ import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
 import { Brand } from 'src/brands/entities/brand.entity';
 import { ProductStatus } from 'src/utils/enums';
 import { ProductFilterDto } from './dto/filter-product.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductsService {
@@ -28,14 +29,49 @@ export class ProductsService {
 
     @InjectRepository(Brand)
     private readonly brandRepository: Repository<Brand>,
+
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   /**
    * Create a new product in the database
    * @param createProductDto data for creating a new product
+   * @param imageCover image cover for the product
+   * @param images additional images for the product
    * @returns created product
    */
-  async create(createProductDto: CreateProductDto) {
+  async create(
+    createProductDto: CreateProductDto,
+    imageCover?: Express.Multer.File,
+    images?: Express.Multer.File[],
+  ) {
+    if (imageCover) {
+      try {
+        const uploadResponse =
+          await this.cloudinaryService.uploadImages(imageCover);
+        createProductDto.imageCover = Array.isArray(uploadResponse)
+          ? uploadResponse[0]
+          : uploadResponse;
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload image: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+    if (images) {
+      try {
+        const uploadResponse =
+          await this.cloudinaryService.uploadImages(images);
+        createProductDto.images = Array.isArray(uploadResponse)
+          ? uploadResponse
+          : [uploadResponse];
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload image: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
     const product = this.productRepository.create(createProductDto);
 
     // Validate category exists
@@ -111,7 +147,7 @@ export class ProductsService {
       ratingAverage_gte,
       ratingAverage_lt,
       ratingAverage_lte,
-      sortBy = 'createAt',
+      sortBy = 'createdAt',
       sortOrder = 'DESC',
       includeInactive = false,
     } = filterDto;
@@ -269,9 +305,16 @@ export class ProductsService {
    * Update a product by Id in the database
    * @param id product Id
    * @param updateProductDto data for updating the product
+   * @param imageCover image cover for the product
+   * @param images additional images for the product
    * @returns updated product
    */
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+    imageCover?: Express.Multer.File,
+    newImagesFiles?: Express.Multer.File[],
+  ) {
     const product = await this.findOne(id);
 
     // Check if the category exists
@@ -319,7 +362,70 @@ export class ProductsService {
       product.brand = brand;
     }
 
+    if (imageCover) {
+      if (product.imageCover) {
+        const publicId =
+          product.imageCover.split('/').pop()?.split('.')[0] ?? '';
+        await this.cloudinaryService.deleteImages(publicId);
+      }
+      try {
+        const uploadResponse =
+          await this.cloudinaryService.uploadImages(imageCover);
+        updateProductDto.imageCover = Array.isArray(uploadResponse)
+          ? uploadResponse[0]
+          : uploadResponse;
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload image: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
+    // Determine images to delete (in product but not in DTO)
+    const imagesToDelete = product.images?.filter(
+      (existingImage) => !updateProductDto.images?.includes(existingImage),
+    );
+
+    // Delete old images from Cloudinary
+    if (imagesToDelete.length > 0) {
+      const publicIds: string[] = [];
+      imagesToDelete.map((image) => {
+        const publicId = image.split('/').pop()?.split('.')[0] ?? '';
+        publicIds.push(publicId);
+      });
+
+      await this.cloudinaryService.deleteImages(publicIds);
+    }
+
+    // Upload new images if provided
+    let uploadedImages: string[] = [];
+
+    if (newImagesFiles) {
+      // Upload new images to Cloudinary
+      try {
+        const uploadResponse =
+          await this.cloudinaryService.uploadImages(newImagesFiles);
+        uploadedImages = Array.isArray(uploadResponse)
+          ? uploadResponse
+          : [uploadResponse];
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload image: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
+
+    //Combine kept and new images
+    const keptImages = product.images?.filter((existingImage) =>
+      updateProductDto.images?.includes(existingImage),
+    );
+
+    updateProductDto.images = [
+      ...(keptImages || []),
+      ...(uploadedImages || []),
+    ];
     Object.assign(product, updateProductDto);
+
     return await this.productRepository.save(product);
   }
 

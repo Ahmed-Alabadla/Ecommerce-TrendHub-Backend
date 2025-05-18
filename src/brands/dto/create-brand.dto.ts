@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  Length,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateBrandDto {
   @IsString()
@@ -18,7 +12,6 @@ export class CreateBrandDto {
   slug: string;
 
   @IsOptional()
-  @IsUrl()
   @IsString()
   image?: string;
 }

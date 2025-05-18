@@ -16,6 +16,9 @@ import { ProductsModule } from './products/products.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CartsModule } from './carts/carts.module';
 import { SettingsModule } from './settings/settings.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { OrdersModule } from './orders/orders.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -67,6 +70,9 @@ import { SettingsModule } from './settings/settings.module';
     ReviewsModule,
     CartsModule,
     SettingsModule,
+    CloudinaryModule,
+    OrdersModule,
+    StripeModule,
   ],
   providers: [
     {

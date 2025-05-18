@@ -18,3 +18,18 @@ export enum ProductStatus {
   OUT_OF_STOCK = 'OutOfStock',
   DISCONTINUED = 'Discontinued',
 }
+export enum PaymentMethod {
+  CASH = 'cash',
+  CARD = 'card',
+}
+export enum OrderStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}
+
+export enum OrderStatusCash {
+  PAID = 'paid',
+  CANCELLED = 'cancelled',
+}

@@ -4,9 +4,10 @@ import { SettingsController } from './settings.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Setting } from './entities/setting.entity';
 import { UsersModule } from 'src/users/users.module';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Setting]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Setting]), UsersModule, CloudinaryModule],
   controllers: [SettingsController],
   providers: [SettingsService],
 })

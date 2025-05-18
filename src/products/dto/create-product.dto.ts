@@ -1,22 +1,34 @@
 import {
-  IsArray,
   IsEnum,
-  IsHexColor,
   IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Matches,
   Min,
   MinLength,
 } from 'class-validator';
 import { ProductStatus } from 'src/utils/enums';
-import { Dimensions } from '../entities/dimensions.entity';
-import { Transform } from 'class-transformer';
+// import { Dimensions } from '../entities/dimensions.entity';
+import { Transform, Type } from 'class-transformer';
+class Dimensions {
+  @IsNumber()
+  @Min(0)
+  @Transform(({ value }) => Number(value))
+  length: number;
 
+  @IsNumber()
+  @Min(0)
+  @Transform(({ value }) => Number(value))
+  width: number;
+
+  @IsNumber()
+  @Min(0)
+  @Transform(({ value }) => Number(value))
+  height: number;
+}
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
@@ -30,43 +42,43 @@ export class CreateProductDto {
 
   @IsNumber()
   @Min(0)
+  @Transform(({ value }) => Number(value))
   quantity: number;
 
   @IsNumber()
   @Min(0)
+  @Transform(({ value }) => Number(value))
   price: number;
 
   @IsNumber()
   @IsOptional()
   @Min(0)
+  @Transform(({ value }) => Number(value))
   priceAfterDiscount?: number;
 
   @IsString()
   @IsNotEmpty()
-  @IsUrl()
-  imageCover: string;
+  // @IsUrl()
+  @IsOptional()
+  imageCover?: string;
 
-  @IsArray()
-  @IsUrl({}, { each: true })
-  images: string[];
-
-  @IsArray()
-  @IsHexColor({ each: true })
-  @Transform(({ value }) =>
-    Array.isArray(value)
-      ? value.map((color: string) =>
-          color.startsWith('#') ? color : `#${color}`,
-        )
-      : ([] as string[]),
-  )
-  colors: string[];
+  // @IsArray()
+  @IsOptional()
+  images?: string[];
 
   @IsNumber()
   @IsOptional()
   @Min(0)
+  @Transform(({ value }) => Number(value))
   weight?: number;
 
   @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string'
+      ? (JSON.parse(value) as Dimensions)
+      : (value as Dimensions),
+  )
+  @Type(() => Dimensions)
   dimensions?: Dimensions;
 
   @IsOptional()
@@ -82,15 +94,18 @@ export class CreateProductDto {
 
   @IsInt()
   @Min(0)
+  @Transform(({ value }) => Number(value))
   categoryId: number;
 
   @IsInt()
   @Min(0)
   @IsOptional()
+  @Transform(({ value }) => Number(value))
   subCategoryId?: number;
 
   @IsInt()
   @Min(0)
   @IsOptional()
+  @Transform(({ value }) => Number(value))
   brandId?: number;
 }

@@ -4,9 +4,10 @@ import { BrandsController } from './brands.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Brand } from './entities/brand.entity';
 import { UsersModule } from 'src/users/users.module';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Brand]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Brand]), UsersModule, CloudinaryModule],
   controllers: [BrandsController],
   providers: [BrandsService],
 })

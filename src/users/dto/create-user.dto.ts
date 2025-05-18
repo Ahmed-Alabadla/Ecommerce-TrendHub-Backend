@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  IsUrl,
   Length,
   MaxDate,
   MinLength,
@@ -36,23 +35,15 @@ export class CreateUserDto {
   role?: UserType;
 
   @IsOptional()
-  @IsUrl()
   @IsString()
   avatar?: string;
 
   @IsOptional()
   @IsDate()
-  @MaxDate(
-    () => {
-      const date = new Date();
-      date.setDate(date.getDate() - 1); // Yesterday
-      return date;
-    },
-    {
-      message: 'Birth date cannot be today or in the future',
-    },
-  )
   @Type(() => Date)
+  @MaxDate(new Date(), {
+    message: 'Birth date cannot be today or in the future',
+  })
   birth_date?: Date;
 
   @IsOptional()
@@ -66,7 +57,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  @Length(6, 255)
+  @MinLength(6)
   address?: string;
 
   @IsEnum(GenderType)

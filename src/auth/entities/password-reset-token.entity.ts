@@ -29,5 +29,5 @@ export class PasswordResetToken {
   user: User;
 
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
-  createAt: Date;
+  createdAt: Date;
 }

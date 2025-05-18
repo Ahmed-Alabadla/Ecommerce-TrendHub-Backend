@@ -72,7 +72,7 @@ export class SubCategoriesService {
     const subCategories = await this.subCategoryRepository.find({
       relations: ['category'],
       where: { slug: slug?.toLowerCase() },
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
     return subCategories;
   }

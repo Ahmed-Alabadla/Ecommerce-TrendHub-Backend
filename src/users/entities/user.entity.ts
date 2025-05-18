@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { PasswordResetToken } from 'src/auth/entities/password-reset-token.entity';
 import { Cart } from 'src/carts/entities/cart.entity';
+import { Order } from 'src/orders/entities/order.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { CURRENT_TIMESTAMP } from 'src/utils/constants';
 import { GenderType, UserType } from 'src/utils/enums';
@@ -48,8 +49,8 @@ export class User {
   @Column({ type: 'varchar', length: '20', nullable: true })
   phone: string;
 
-  @Column({ type: 'varchar', length: '255', nullable: true })
-  // @Column({ type: 'text', nullable: true })
+  // @Column({ type: 'varchar', length: '255', nullable: true })
+  @Column({ type: 'text', nullable: true })
   address: string;
 
   @Column({ default: true })
@@ -59,7 +60,7 @@ export class User {
   gender: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',
@@ -81,4 +82,7 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user)
   cart: Cart;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }

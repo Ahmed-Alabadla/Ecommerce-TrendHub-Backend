@@ -39,7 +39,7 @@ export class SuppliersService {
    */
   async findAll() {
     const suppliers = await this.suppliersRepository.find({
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
     return suppliers;
   }

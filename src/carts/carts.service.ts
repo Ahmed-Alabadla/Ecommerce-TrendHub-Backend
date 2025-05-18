@@ -30,7 +30,7 @@ export class CartsService {
    * Create a new cart in the database
    * @param productId id of the product
    * @param userId id of the user
-   * @param createCartDto data for creating a new cart (color, quantity, etc.)
+   * @param createCartDto data for creating a new cart (quantity, etc.)
    * @returns created cart
    */
   async createCart(
@@ -100,10 +100,13 @@ export class CartsService {
       newCart.cartItems = [cartItem];
 
       // update the total price of the cart and if product has a discount, apply it
-      if (cartItem.product.priceAfterDiscount)
+      if (Number(cartItem.product.priceAfterDiscount) > 0)
         newCart.totalPrice =
-          cartItem.product.priceAfterDiscount * cartItem.quantity;
-      else newCart.totalPrice = cartItem.product.price * cartItem.quantity;
+          Number(cartItem.product.priceAfterDiscount) *
+          Number(cartItem.quantity);
+      else
+        newCart.totalPrice =
+          Number(cartItem.product.price) * Number(cartItem.quantity);
 
       // save the cart with the new cart item
       await this.cartsRepository.save(newCart);
@@ -118,9 +121,9 @@ export class CartsService {
         relations: ['product', 'cart'],
       });
 
-      // if the product is already in the cart, update the quantity and color
+      // if the product is already in the cart, update the quantity
       if (cartItem) {
-        const oldQuantity: number = cartItem.quantity;
+        const oldQuantity: number = Number(cartItem.quantity);
 
         if (createCartDto.quantity) {
           if (createCartDto.quantity > product.quantity) {
@@ -131,10 +134,6 @@ export class CartsService {
           cartItem.quantity += createCartDto.quantity;
         } else {
           cartItem.quantity += 1;
-        }
-
-        if (createCartDto.color) {
-          cartItem.color = createCartDto.color;
         }
 
         // Save the cartItem to the database
@@ -151,13 +150,14 @@ export class CartsService {
 
         let itemTotalPrice: number;
         let itemTotalPriceOld: number;
-        if (cartItem.product.priceAfterDiscount) {
+        if (Number(cartItem.product.priceAfterDiscount) > 0) {
           itemTotalPrice =
-            cartItem.product.priceAfterDiscount * cartItem.quantity;
-          itemTotalPriceOld = oldQuantity * cartItem.product.priceAfterDiscount;
+            Number(cartItem.product.priceAfterDiscount) * cartItem.quantity;
+          itemTotalPriceOld =
+            oldQuantity * Number(cartItem.product.priceAfterDiscount);
         } else {
-          itemTotalPrice = cartItem.product.price * cartItem.quantity;
-          itemTotalPriceOld = oldQuantity * cartItem.product.price;
+          itemTotalPrice = Number(cartItem.product.price) * cartItem.quantity;
+          itemTotalPriceOld = oldQuantity * Number(cartItem.product.price);
         }
 
         // totalPrice = total price + new total price for item after update quantity - old total price for item before update quantity
@@ -181,11 +181,13 @@ export class CartsService {
         // update the total price of the cart and if product has a discount, apply it
 
         let itemTotalPrice: number;
-        if (newCartItem.product.priceAfterDiscount) {
+        if (Number(newCartItem.product.priceAfterDiscount) > 0) {
           itemTotalPrice =
-            newCartItem.product.priceAfterDiscount * newCartItem.quantity;
+            Number(newCartItem.product.priceAfterDiscount) *
+            newCartItem.quantity;
         } else {
-          itemTotalPrice = newCartItem.product.price * newCartItem.quantity;
+          itemTotalPrice =
+            Number(newCartItem.product.price) * newCartItem.quantity;
         }
 
         cart.totalPrice = Number(cart.totalPrice) + itemTotalPrice;

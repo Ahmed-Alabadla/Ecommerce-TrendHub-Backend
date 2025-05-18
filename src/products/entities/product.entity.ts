@@ -41,24 +41,11 @@ export class Product {
   })
   priceAfterDiscount: number;
 
-  @Column({ name: 'image_cover' })
+  @Column({ name: 'image_cover', nullable: true })
   imageCover: string;
 
   @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
   images: string[];
-
-  // @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
-  // colors: string[];
-  @Column({
-    type: 'text',
-    array: true,
-    default: [],
-    transformer: {
-      to: (value: string[]) => value, // No transformation when saving
-      from: (value: string[]) => value.map((v) => v.trim()), // Ensure clean values when reading
-    },
-  })
-  colors: string[];
 
   @Column({ default: 0 })
   sold: number;
@@ -84,11 +71,11 @@ export class Product {
   @Column({ type: 'decimal', precision: 8, scale: 3, nullable: true })
   weight: number; // "in KG"
 
-  @Column(() => Dimensions)
+  @Column({ type: 'jsonb', nullable: true })
   dimensions: Dimensions; // "in cm"
 
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamp',

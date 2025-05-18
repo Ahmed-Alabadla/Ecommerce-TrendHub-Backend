@@ -10,7 +10,7 @@ import { User } from './entities/user.entity';
 import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserType } from 'src/utils/enums';
-import { ConfigService } from '@nestjs/config';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
@@ -18,15 +18,16 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
 
-    private readonly config: ConfigService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   /**
    * Creates a new user in the database.
    * @param createUserDto  data for creating a new user
+   * @param file optional image file for the user
    * @returns created user
    */
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, file?: Express.Multer.File) {
     const existingUser = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -35,6 +36,19 @@ export class UsersService {
     }
     // Hash the password before saving
     createUserDto.password = await this.hashPassword(createUserDto.password);
+
+    if (file) {
+      try {
+        const uploadResponse = await this.cloudinaryService.uploadImages(file);
+        createUserDto.avatar = Array.isArray(uploadResponse)
+          ? uploadResponse[0]
+          : uploadResponse;
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload avatar: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
 
     const user = this.usersRepository.create(createUserDto);
     return await this.usersRepository.save(user);
@@ -79,7 +93,7 @@ export class UsersService {
       where: filters,
       skip,
       take: parasIntLimit,
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
     const totalFilteredUsers = await this.usersRepository.count({
       where: filters,
@@ -117,14 +131,36 @@ export class UsersService {
    * Updates a user by ID in the database.
    * @param id  user ID
    * @param updateUserDto  data for updating the user
+   * @param file optional image file for the user
    * @returns updated user
    */
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    file?: Express.Multer.File,
+  ) {
     const user = await this.findOne(id);
 
     // Check if the user is active
     if (user.isActive === false) {
       throw new BadRequestException('User is not active!');
+    }
+
+    if (file) {
+      if (user.avatar) {
+        const publicId = user.avatar.split('/').pop()?.split('.')[0] ?? '';
+        await this.cloudinaryService.deleteImages(publicId);
+      }
+      try {
+        const uploadResponse = await this.cloudinaryService.uploadImages(file);
+        updateUserDto.avatar = Array.isArray(uploadResponse)
+          ? uploadResponse[0]
+          : uploadResponse;
+      } catch (error) {
+        throw new BadRequestException(
+          `Failed to upload avatar: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
 
     // Merge new data

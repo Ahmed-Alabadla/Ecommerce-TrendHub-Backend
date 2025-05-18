@@ -7,11 +7,13 @@ import { Product } from './entities/product.entity';
 import { Category } from 'src/categories/entities/category.entity';
 import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
 import { Brand } from 'src/brands/entities/brand.entity';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     UsersModule,
     TypeOrmModule.forFeature([Product, Category, SubCategory, Brand]),
+    CloudinaryModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

@@ -1,14 +1,15 @@
+import { Transform } from 'class-transformer';
 import {
   IsString,
   IsOptional,
   IsEmail,
-  IsNumber,
-  IsBoolean,
   IsPhoneNumber,
   MinLength,
   MaxLength,
+  IsNumber,
   Min,
   Max,
+  IsBooleanString,
 } from 'class-validator';
 
 export class CreateSettingDto {
@@ -41,22 +42,24 @@ export class CreateSettingDto {
   store_logo?: string;
 
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber()
   @Min(0)
   @Max(99.99)
+  @Transform(({ value }) => Number(value))
   tax_rate?: number;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   tax_enabled?: boolean;
 
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber()
   @Min(0)
   @Max(99.99)
+  @Transform(({ value }) => Number(value))
   shipping_rate?: number;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   shipping_enabled?: boolean;
 }
