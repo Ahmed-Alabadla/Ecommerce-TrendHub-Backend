@@ -77,34 +77,29 @@ export class OrdersService {
     const FindSettings = await this.settingsRepository.find();
     const settings = FindSettings[0];
 
+    const totalCartPrice =
+      cart.totalPriceAfterDiscount && cart.totalPriceAfterDiscount > 0
+        ? cart.totalPriceAfterDiscount
+        : cart.totalPrice;
+
     // Check if tax is enabled and calculate tax price
     let taxPrice: number = 0;
     if (settings.tax_enabled) {
-      taxPrice =
-        Number(cart.totalPriceAfterDiscount) > 0
-          ? (Number(cart.totalPriceAfterDiscount) * Number(settings.tax_rate)) /
-            100
-          : (Number(cart.totalPrice) * Number(settings.tax_rate)) / 100;
+      taxPrice = totalCartPrice
+        ? (Number(totalCartPrice) * Number(settings.tax_rate)) / 100
+        : 0;
     }
 
     // Check if shipping is enabled and calculate shipping price
     let shippingPrice: number = 0;
     if (settings.shipping_enabled) {
-      shippingPrice =
-        Number(cart.totalPriceAfterDiscount) > 0
-          ? (Number(cart.totalPriceAfterDiscount) *
-              Number(settings.shipping_rate)) /
-            100
-          : (Number(cart.totalPrice) * Number(settings.shipping_rate)) / 100;
+      shippingPrice = totalCartPrice
+        ? (Number(totalCartPrice) * Number(settings.shipping_rate)) / 100
+        : 0;
     }
 
     // Calculate the total order price
-    const totalOrderPrice =
-      (Number(cart.totalPriceAfterDiscount) > 0
-        ? Number(cart.totalPriceAfterDiscount)
-        : Number(cart.totalPrice)) +
-      taxPrice +
-      shippingPrice;
+    const totalOrderPrice = Number(totalCartPrice) + taxPrice + shippingPrice;
 
     const newOrder = this.ordersRepository.create({
       taxPrice,
@@ -193,7 +188,7 @@ export class OrdersService {
   async updatePaidStatusCash(orderId: number, updateOrderDto: UpdateOrderDto) {
     const order = await this.ordersRepository.findOne({
       where: { id: orderId },
-      relations: ['orderItems', 'orderItems.product'],
+      relations: ['orderItems', 'orderItems.product', 'user'],
     });
 
     if (!order)
@@ -206,10 +201,13 @@ export class OrdersService {
         'Payment method is not valid for this operation!',
       );
 
+    if (order.status === OrderStatus.CANCELLED)
+      throw new BadRequestException('Order already cancelled!');
     if (updateOrderDto.status === OrderStatusCash.CANCELLED) {
       order.status = OrderStatus.CANCELLED;
       order.isPaid = false;
       order.isDelivered = false;
+      return await this.ordersRepository.save(order);
     }
     await this.updateProductInventory(order);
 
