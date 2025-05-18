@@ -14,6 +14,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -70,6 +71,23 @@ export class AdminUsersController {
     @Query('limit') limit?: string,
   ) {
     return this.usersService.findAll(name, email, role, page, limit);
+  }
+
+  /**
+   * @method GET
+   * @route ~/api/admin/users/role/:role
+   * @access Private [Admin]
+   */
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.ADMIN)
+  @Get('role/:role')
+  findByRole(@Param('role') role: string) {
+    if (!Object.values(UserType).includes(role.toLowerCase() as UserType)) {
+      throw new BadRequestException(
+        'Invalid role provided for filtering users by role (admin/customer)',
+      );
+    }
+    return this.usersService.findAllByRole(role);
   }
 
   /**

@@ -63,7 +63,7 @@ export class UsersService {
     email?: string,
     role?: UserType,
     page: string = '1',
-    limit: string = '5',
+    limit: string = '10',
   ) {
     // Convert page string to number and throw BadRequestException if parasIntPage isNAN
     const parasIntPage = parseInt(page);
@@ -114,6 +114,19 @@ export class UsersService {
         last_page: lastPage,
       },
     };
+  }
+
+  /**
+   * Finds all users by role in the database.
+   * @param role  user role
+   * @returns list of users with the specified role
+   */
+  async findAllByRole(role: string) {
+    const users = await this.usersRepository.find({
+      where: { role: role.toLowerCase() as UserType },
+      order: { createdAt: 'DESC' },
+    });
+    return users;
   }
 
   /**
