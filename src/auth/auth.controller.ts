@@ -23,6 +23,7 @@ import { Roles } from 'src/users/decorators/user-role.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { JWTPayload } from 'src/utils/types';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -120,5 +121,30 @@ export class AuthController {
     @CurrentUser() payload: JWTPayload,
   ) {
     return this.authService.changePassword(body, payload.id);
+  }
+
+  /**
+   * @method GET
+   * @route ~/api/auth/google
+   * @access Public
+   * @description This route will redirect the user to the Google login page.
+   * The user will be prompted to enter their Google credentials.
+   */
+  @Get('google')
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth() {}
+
+  /**
+   * @method GET
+   * @route ~/api/auth/google/callback
+   * @access Public
+   * @description This route will be called by Google after the user has logged in.
+   * The user will be redirected to this route with a code that can be used to get the user's profile.
+   */
+  @Get('google/callback')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Req() req: Request) {
+    // return req.user;
+    return this.authService.googleLogin(req);
   }
 }

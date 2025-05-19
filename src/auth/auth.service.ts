@@ -13,10 +13,12 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
-import { JWTPayload } from 'src/utils/types';
+import { GoogleUserType, JWTPayload } from 'src/utils/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { Request } from 'express';
+import { generateRandomPassword } from 'src/utils/util';
 
 @Injectable()
 export class AuthService {
@@ -278,6 +280,47 @@ export class AuthService {
     await this.usersRepository.save(user);
 
     return { message: 'Password updated successfully' };
+  }
+
+  /**
+   * Google login
+   * @param user data from google
+   * @returns JWT (access_token)
+   */
+  async googleLogin(req: Request) {
+    console.log('user', req.user);
+    // return true;
+    const { name, email, avatar, isAccountVerified } =
+      req.user as GoogleUserType;
+
+    // Check if user exists
+    let existingUser = await this.usersRepository.findOne({
+      where: { email },
+    });
+
+    // If user does not exist, create a new user
+    if (!existingUser) {
+      // generate random password and hash it
+      const password = await this.hashPassword(generateRandomPassword());
+
+      existingUser = this.usersRepository.create({
+        name,
+        email,
+        avatar,
+        isAccountVerified,
+        password,
+      });
+
+      await this.usersRepository.save(existingUser);
+    }
+
+    // Generate JWT Token
+    const access_token = await this.generateJWT({
+      id: existingUser.id,
+      userType: existingUser.role,
+    });
+
+    return { access_token };
   }
 
   /**
