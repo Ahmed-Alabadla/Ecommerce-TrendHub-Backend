@@ -160,7 +160,10 @@ export class UsersService {
     }
 
     if (file) {
-      if (user.avatar) {
+      if (
+        user.avatar &&
+        !user.avatar.startsWith('https://lh3.googleusercontent.com')
+      ) {
         const publicId = user.avatar.split('/').pop()?.split('.')[0] ?? '';
         await this.cloudinaryService.deleteImages(publicId);
       }
