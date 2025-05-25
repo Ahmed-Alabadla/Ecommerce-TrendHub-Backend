@@ -123,7 +123,10 @@ export class UsersService {
    */
   async findAllByRole(role: string) {
     const users = await this.usersRepository.find({
-      where: { role: role.toLowerCase() as UserType },
+      where: {
+        role: role.toLowerCase() as UserType,
+        isActive: true, // Only active users
+      },
       order: { createdAt: 'DESC' },
     });
     return users;
