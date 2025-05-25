@@ -288,7 +288,6 @@ export class AuthService {
    * @returns JWT (access_token)
    */
   async googleLogin(req: Request) {
-    console.log('user', req.user);
     // return true;
     const { name, email, avatar, isAccountVerified } =
       req.user as GoogleUserType;
@@ -320,7 +319,7 @@ export class AuthService {
       userType: existingUser.role,
     });
 
-    return { access_token };
+    return { access_token, user: existingUser };
   }
 
   /**

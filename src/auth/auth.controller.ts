@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -16,7 +17,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
 import { UserType } from 'src/utils/enums';
 import { Roles } from 'src/users/decorators/user-role.decorator';
@@ -24,10 +25,14 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { CurrentUser } from 'src/users/decorators/current-user.decorator';
 import { JWTPayload } from 'src/utils/types';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * @method POST
@@ -143,8 +148,43 @@ export class AuthController {
    */
   @Get('google/callback')
   @UseGuards(GoogleOAuthGuard)
-  googleAuthRedirect(@Req() req: Request) {
-    // return req.user;
-    return this.authService.googleLogin(req);
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    try {
+      // Process the Google login
+      const authResult = await this.authService.googleLogin(req);
+
+      const url =
+        authResult.user.role === UserType.ADMIN
+          ? `${this.configService.get<string>('DASHBOARD_FRONTEND_URL')}/auth/google`
+          : `${this.configService.get<string>('APP_FRONTEND_URL')}/auth/google`;
+
+      const redirectUrl = new URL(url);
+      redirectUrl.searchParams.set('access_token', authResult.access_token);
+      // redirectUrl.searchParams.set('refresh_token', authResult.refreshToken);
+      // Redirect back to the original application
+      return res.redirect(redirectUrl.toString());
+
+      // =============================
+    } catch (error: unknown) {
+      // Check for returnTo or clientType parameter
+      const returnTo = req.query.returnTo as string;
+      const clientType = req.query.clientType as string;
+
+      let errorRedirect: string = `${this.configService.get<string>('APP_FRONTEND_URL')}/auth/google`; // Default fallback URL
+
+      if (returnTo) {
+        errorRedirect = returnTo;
+      } else if (clientType === 'admin') {
+        errorRedirect = `${this.configService.get<string>('DASHBOARD_FRONTEND_URL')}/auth/google`;
+      } else if (clientType === 'app') {
+        errorRedirect = `${this.configService.get<string>('APP_FRONTEND_URL')}/auth/google`;
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return res.redirect(
+        `${errorRedirect}?error=${encodeURIComponent(errorMessage)}`,
+      );
+    }
   }
 }
