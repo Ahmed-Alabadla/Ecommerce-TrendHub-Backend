@@ -19,6 +19,7 @@ import { SettingsModule } from './settings/settings.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { OrdersModule } from './orders/orders.module';
 import { StripeModule } from './stripe/stripe.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { StripeModule } from './stripe/stripe.module';
     CloudinaryModule,
     OrdersModule,
     StripeModule,
+    DashboardModule,
   ],
   providers: [
     {
