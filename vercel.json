@@ -10,7 +10,7 @@
     {
       "src": "/(.*)",
       "dest": "../../main.ts",
-      "methods": ["GET", "POST", "DELETE", "PATCH"]
+      "methods": ["GET", "POST", "DELETE", "PATCH", "OPTIONS"]
     }
   ]
 }
