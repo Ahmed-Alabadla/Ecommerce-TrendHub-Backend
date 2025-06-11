@@ -20,6 +20,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { OrdersModule } from './orders/orders.module';
 import { StripeModule } from './stripe/stripe.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     StripeModule,
     DashboardModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_INTERCEPTOR,
