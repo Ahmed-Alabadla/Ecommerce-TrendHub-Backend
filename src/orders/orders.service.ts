@@ -67,9 +67,9 @@ export class OrdersService {
       throw new NotFoundException("Don't have any cart yet!");
     }
 
-    if (!createOrderDto?.shippingAddress && !cart.user?.address) {
+    if (!createOrderDto.shippingAddress) {
       throw new BadRequestException(
-        'Please provide a shipping address or update your profile address',
+        'Please provide a shipping address for the order.',
       );
     }
 
@@ -108,9 +108,7 @@ export class OrdersService {
       totalOrderPrice,
       orderItems: [],
       user: cart.user,
-      shippingAddress: createOrderDto?.shippingAddress
-        ? createOrderDto.shippingAddress
-        : cart.user?.address,
+      shippingAddress: createOrderDto.shippingAddress,
     });
 
     // set the cart items to the order
@@ -444,7 +442,7 @@ export class OrdersService {
     }
 
     try {
-      await this.cartItemsRepository.remove(cart.cartItems);
+      await this.cartItemsRepository.delete({ cart });
       await this.cartsRepository.remove(cart);
       this.logger.log(`Cleared cart for user ${userId}`);
     } catch (error) {

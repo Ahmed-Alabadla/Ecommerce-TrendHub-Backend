@@ -3,6 +3,11 @@ export type JWTPayload = {
   userType: string;
 };
 
+export interface RefreshTokenPayload extends JWTPayload {
+  usageCount: number;
+  maxUsage: number;
+}
+
 export type AccessTokenType = {
   access_token: string;
 };

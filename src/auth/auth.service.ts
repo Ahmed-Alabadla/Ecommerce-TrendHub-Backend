@@ -2,9 +2,9 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { MailService } from './../mail/mail.service';
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -13,12 +13,18 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
-import { GoogleUserType, JWTPayload } from 'src/utils/types';
+import {
+  GoogleUserType,
+  JWTPayload,
+  RefreshTokenPayload,
+} from 'src/utils/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { generateRandomPassword } from 'src/utils/util';
+import { UserType } from 'src/utils/enums';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -105,7 +111,7 @@ export class AuthService {
   /**
    * Login User
    * @param loginDto data for login to user account
-   * @returns JWT (access_token)
+   * @returns JWT (access_token, refresh_token)
    */
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
@@ -113,6 +119,11 @@ export class AuthService {
     const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) throw new BadRequestException('Invalid email or password!');
+
+    // Check if account is active
+    if (!user.isActive) {
+      throw new BadRequestException('Invalid email or password!');
+    }
 
     // Check if match password
     const isMatchPassword = await bcrypt.compare(password, user.password);
@@ -137,13 +148,21 @@ export class AuthService {
       };
     }
 
-    // generate JWT Token
-    const access_token = await this.generateJWT({
+    // generate JWT Access Token
+    const access_token = await this.generateAccessToken({
       id: user.id,
       userType: user.role,
     });
 
-    return { access_token };
+    // generate JWT Refresh Token
+    const refresh_token = await this.generateRefreshToken({
+      id: user.id,
+      userType: user.role,
+      usageCount: 0,
+      maxUsage: 5,
+    });
+
+    return { access_token, refresh_token };
   }
 
   /**
@@ -152,7 +171,7 @@ export class AuthService {
    * @param verificationToken verification token
    * @returns message successfully
    */
-  async verifyEmail(userId: number, verificationToken: string) {
+  async verifyEmail(userId: number, verificationToken: string, res: Response) {
     const user = await this.usersRepository.findOne({
       where: { id: userId, verificationToken },
     });
@@ -163,9 +182,20 @@ export class AuthService {
     user.verificationToken = null;
 
     await this.usersRepository.save(user);
-    return {
-      message: 'Email verified successfully!',
-    };
+
+    const url =
+      user.role === UserType.ADMIN
+        ? `${this.config.get<string>('DASHBOARD_FRONTEND_URL')}/auth/login`
+        : `${this.config.get<string>('APP_FRONTEND_URL')}/auth/login`;
+
+    const redirectUrl = new URL(url);
+    redirectUrl.searchParams.set(
+      'message',
+      'Email verified successfully! Please login to your account.',
+    );
+
+    // Redirect to the frontend application
+    return res.redirect(redirectUrl.toString());
   }
 
   /**
@@ -174,7 +204,7 @@ export class AuthService {
    * @param frontendType type of frontend (app or dashboard)
    * @returns message successfully
    */
-  async forgotPassword(email: string, frontendType: 'app' | 'dashboard') {
+  async forgotPassword(email: string) {
     // Check if user exists
     const user = await this.usersRepository.findOne({ where: { email } });
     if (!user)
@@ -190,12 +220,12 @@ export class AuthService {
       user,
       token,
       expiresAt,
-      frontendType,
     });
 
-    const expectedOrigin = this.config.get(
-      `${frontendType}_FRONTEND_URL`,
-    ) as string;
+    const expectedOrigin =
+      user.role === UserType.ADMIN
+        ? this.config.get<string>('DASHBOARD_FRONTEND_URL')
+        : this.config.get<string>('APP_FRONTEND_URL');
 
     const link = `${expectedOrigin}/auth/reset-password?userId=${user.id}&token=${passwordResetToken.token}`;
 
@@ -212,11 +242,10 @@ export class AuthService {
    * @param requestOrigin the url for this request
    */
   async resetPassword(
-    userId: number,
-    token: string,
-    newPassword: string,
-    requestOrigin: string,
+    resetPasswordDto: ResetPasswordDto,
   ): Promise<{ message: string }> {
+    const { userId, token, newPassword } = resetPasswordDto;
+
     //  Find valid token
     const resetToken = await this.passwordResetTokenRepository.findOne({
       where: { token },
@@ -230,15 +259,6 @@ export class AuthService {
     // Verify user match
     if (resetToken.user.id !== userId) {
       throw new BadRequestException('Invalid token for this user');
-    }
-
-    // Verify frontend match
-    const expectedOrigin = this.config.get(
-      `${resetToken.frontendType}_FRONTEND_URL`,
-    ) as string;
-
-    if (new URL(requestOrigin).hostname !== new URL(expectedOrigin).hostname) {
-      throw new ForbiddenException();
     }
 
     // Update user password
@@ -312,25 +332,107 @@ export class AuthService {
 
       await this.usersRepository.save(existingUser);
     }
+    if (!existingUser.isActive) existingUser.isActive = true;
+
+    if (!existingUser.isAccountVerified) existingUser.isAccountVerified = true;
+
+    await this.usersRepository.save(existingUser);
 
     // Generate JWT Token
-    const access_token = await this.generateJWT({
+    const access_token = await this.generateAccessToken({
       id: existingUser.id,
       userType: existingUser.role,
     });
 
-    return { access_token, user: existingUser };
+    // generate JWT Refresh Token
+    const refresh_token = await this.generateRefreshToken({
+      id: existingUser.id,
+      userType: existingUser.role,
+      usageCount: 0,
+      maxUsage: 5,
+    });
+
+    return { access_token, refresh_token, user: existingUser };
+  }
+
+  /**
+   *
+   * @param refreshToken
+   * @returns
+   */
+  async refreshAccessToken(refreshToken: string) {
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      throw new UnauthorizedException('Invalid token format');
+    }
+    try {
+      const payload = await this.jwtService.verifyAsync<RefreshTokenPayload>(
+        refreshToken,
+        {
+          secret: this.config.get<string>('JWT_SECRET_REFRESH'),
+        },
+      );
+
+      if (payload.usageCount > payload.maxUsage) {
+        throw new BadRequestException('Refresh token exceeded maximum usage');
+      }
+
+      console.log('========= Start Refresh Token =========');
+      console.log({
+        id: payload.id,
+        userType: payload.userType,
+        usageCount: payload.usageCount + 1,
+        maxUsage: payload.maxUsage,
+      });
+      console.log('========= End Refresh Token =========');
+
+      const newAccessToken = await this.generateAccessToken({
+        id: payload.id,
+        userType: payload.userType,
+      });
+
+      const updatedRefreshToken = await this.generateRefreshToken({
+        id: payload.id,
+        userType: payload.userType,
+        usageCount: payload.usageCount + 1,
+        maxUsage: payload.maxUsage,
+      });
+
+      return {
+        access_token: newAccessToken,
+        refresh_token: updatedRefreshToken,
+      };
+    } catch (err) {
+      console.log(err);
+      if (
+        err instanceof UnauthorizedException ||
+        err instanceof BadRequestException
+      ) {
+        throw err;
+      }
+      throw new UnauthorizedException('Access denied, Invalid Refresh Token!');
+    }
   }
 
   /**
    * Generate Json Web Token
    * @param payload JWT payload
-   * @returns token
+   * @returns access token
    */
-  private generateJWT(payload: JWTPayload): Promise<string> {
+  private generateAccessToken(payload: JWTPayload): Promise<string> {
     return this.jwtService.signAsync(payload);
   }
 
+  /**
+   * Generate Json Web Token
+   * @param payload JWT payload
+   * @returns refresh token
+   */
+  private generateRefreshToken(payload: RefreshTokenPayload): Promise<string> {
+    return this.jwtService.signAsync(payload, {
+      secret: this.config.get<string>('JWT_SECRET_REFRESH'),
+      expiresIn: this.config.get<string>('JWT_EXPIRES_IN_REFRESH'),
+    });
+  }
   /**
    * Hash password
    * @param password password to hashed

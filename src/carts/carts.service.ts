@@ -75,7 +75,7 @@ export class CartsService {
     // check if the cart exists for the user
     const cart = await this.cartsRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user'],
+      relations: ['user', 'coupon'],
     });
 
     // if the cart does not exist, create a new one
@@ -131,9 +131,9 @@ export class CartsService {
               'Quantity is greater than available stock',
             );
           }
-          cartItem.quantity += createCartDto.quantity;
+          cartItem.quantity = createCartDto.quantity;
         } else {
-          cartItem.quantity += 1;
+          cartItem.quantity = Number(cartItem.quantity) + 1;
         }
 
         // Save the cartItem to the database
@@ -141,7 +141,7 @@ export class CartsService {
 
         const updateCart = await this.cartsRepository.findOne({
           where: { id: cart.id },
-          relations: ['cartItems'],
+          relations: ['cartItems', 'coupon'],
         });
         if (!updateCart) {
           throw new NotFoundException(`Cart with ${cart.id} not fount`);
@@ -150,6 +150,7 @@ export class CartsService {
 
         let itemTotalPrice: number;
         let itemTotalPriceOld: number;
+
         if (Number(cartItem.product.priceAfterDiscount) > 0) {
           itemTotalPrice =
             Number(cartItem.product.priceAfterDiscount) * cartItem.quantity;
@@ -163,6 +164,21 @@ export class CartsService {
         // totalPrice = total price + new total price for item after update quantity - old total price for item before update quantity
         updateCart.totalPrice =
           Number(updateCart.totalPrice) - itemTotalPriceOld + itemTotalPrice;
+
+        // Update totalPriceAfterDiscount if coupon is applied
+        if (updateCart.coupon) {
+          if ((updateCart.coupon.type as CouponType) === CouponType.FIXED) {
+            updateCart.totalPriceAfterDiscount =
+              Number(updateCart.totalPrice) - updateCart.coupon.discount;
+          }
+          if (
+            (updateCart.coupon.type as CouponType) === CouponType.PERCENTAGE
+          ) {
+            updateCart.totalPriceAfterDiscount =
+              Number(updateCart.totalPrice) -
+              (updateCart.totalPrice * updateCart.coupon.discount) / 100;
+          }
+        }
 
         return await this.cartsRepository.save(updateCart);
       } else {
@@ -191,10 +207,84 @@ export class CartsService {
         }
 
         cart.totalPrice = Number(cart.totalPrice) + itemTotalPrice;
+        //
+        // Update totalPriceAfterDiscount if coupon is applied
+        if (cart.coupon) {
+          if ((cart.coupon.type as CouponType) === CouponType.FIXED) {
+            cart.totalPriceAfterDiscount =
+              Number(cart.totalPrice) - cart.coupon.discount;
+          }
+          if ((cart.coupon.type as CouponType) === CouponType.PERCENTAGE) {
+            cart.totalPriceAfterDiscount =
+              Number(cart.totalPrice) -
+              (cart.totalPrice * cart.coupon.discount) / 100;
+          }
+        }
+
         // save the cart with the new cart item
         return await this.cartsRepository.save(cart);
       }
     }
+  }
+
+  /**
+   * Remove a specific item from the cart
+   * @param productId id of the product to remove
+   * @param userId id of the user
+   * @returns updated cart or confirmation message
+   */
+  async removeItemFromCart(productId: number, userId: number) {
+    // find the cart by userId
+    const cart = await this.findOneByUser(userId);
+
+    // find the cart item to remove
+    const cartItem = await this.cartItemsRepository.findOne({
+      where: {
+        product: { id: productId },
+        cart: { id: cart.id },
+      },
+      relations: ['product'],
+    });
+
+    // check if the cart item exists
+    if (!cartItem) {
+      throw new NotFoundException(
+        `Product with id ${productId} not found in cart`,
+      );
+    }
+
+    // calculate the item's total price to subtract from cart total
+    let itemTotalPrice: number;
+    if (Number(cartItem.product.priceAfterDiscount) > 0) {
+      itemTotalPrice =
+        Number(cartItem.product.priceAfterDiscount) * cartItem.quantity;
+    } else {
+      itemTotalPrice = Number(cartItem.product.price) * cartItem.quantity;
+    }
+
+    // remove the cart item from database
+    await this.cartItemsRepository.remove(cartItem);
+
+    // update the cart's total price
+    cart.totalPrice = Number(cart.totalPrice) - itemTotalPrice;
+
+    // if coupon is applied, recalculate totalPriceAfterDiscount
+    if (cart.coupon) {
+      if ((cart.coupon.type as CouponType) === CouponType.FIXED) {
+        cart.totalPriceAfterDiscount =
+          Number(cart.totalPrice) - cart.coupon.discount;
+      }
+      if ((cart.coupon.type as CouponType) === CouponType.PERCENTAGE) {
+        cart.totalPriceAfterDiscount =
+          Number(cart.totalPrice) -
+          (cart.totalPrice * cart.coupon.discount) / 100;
+      }
+    }
+
+    // save the updated cart
+    await this.cartsRepository.save(cart);
+
+    return { message: 'Item removed from cart successfully!' };
   }
 
   /**
@@ -217,7 +307,12 @@ export class CartsService {
   async findOneByUser(userId: number) {
     const cart = await this.cartsRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['cartItems', 'cartItems.product', 'coupon'],
+      relations: [
+        'cartItems',
+        'cartItems.product',
+        'coupon',
+        'cartItems.product.brand',
+      ],
     });
     if (!cart) {
       throw new NotFoundException("Don't have any cart yet!");

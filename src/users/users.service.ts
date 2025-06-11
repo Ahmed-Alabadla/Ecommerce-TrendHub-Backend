@@ -197,6 +197,7 @@ export class UsersService {
   async remove(id: number) {
     const user = await this.findOne(id);
     user.isActive = false;
+    user.isAccountVerified = false; // Deactivate the user account
     await this.usersRepository.save(user);
     return { message: 'User deleted successfully!' };
   }

@@ -51,9 +51,7 @@ export class AuthRolesGuard implements CanActivate {
       }
       request[CURRENT_USER_KEY] = payload;
       return true;
-    } catch (err) {
-      console.log(err);
-
+    } catch {
       throw new UnauthorizedException('Access denied, Invalid token');
     }
   }

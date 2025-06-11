@@ -52,8 +52,8 @@ export class StripeService {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${this.configService.get('APP_FRONTEND_URL')}/success`,
-      cancel_url: `${this.configService.get('APP_FRONTEND_URL')}/cancel`,
+      success_url: `${this.configService.get('APP_FRONTEND_URL')}/orders`,
+      cancel_url: `${this.configService.get('APP_FRONTEND_URL')}/cart`,
       metadata: {
         orderId,
       },

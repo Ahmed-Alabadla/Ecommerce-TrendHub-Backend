@@ -19,9 +19,6 @@ export class PasswordResetToken {
   @Column()
   expiresAt: Date;
 
-  @Column({ type: 'enum', enum: ['app', 'dashboard'], default: 'app' })
-  frontendType: 'app' | 'dashboard';
-
   @ManyToOne(() => User, (user) => user.passwordResetTokens, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

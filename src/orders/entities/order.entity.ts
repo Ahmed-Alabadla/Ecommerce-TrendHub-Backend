@@ -43,8 +43,13 @@ export class Order {
   @Column({ type: 'date', nullable: true })
   deliveredAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  shippingAddress: string;
+  @Column('jsonb')
+  shippingAddress: {
+    street: string;
+    country: string;
+    city: string;
+    postalCode: number;
+  };
 
   @Column({ nullable: true })
   stripeCheckoutId: string;

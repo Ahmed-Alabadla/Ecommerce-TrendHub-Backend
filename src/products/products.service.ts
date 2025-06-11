@@ -132,9 +132,9 @@ export class ProductsService {
       page = 1,
       limit = 10,
       search,
-      category,
-      subcategory,
-      brand,
+      categories,
+      subcategories,
+      brands,
       sold_gt,
       sold_gte,
       sold_lt,
@@ -157,22 +157,14 @@ export class ProductsService {
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.subCategory', 'subCategory')
       .leftJoinAndSelect('product.brand', 'brand')
-      .leftJoinAndSelect('product.reviews', 'reviews')
+      .leftJoin('product.reviews', 'reviews')
       .select([
         'product',
-        'category.id',
-        'category.name',
-        'category.slug',
-        'subCategory.id',
-        'subCategory.name',
-        'subCategory.slug',
-        'brand.id',
-        'brand.name',
-        'brand.slug',
+        'category',
+        'subCategory',
+        'brand',
         // 'reviews',
-      ])
-
-      .groupBy('product.id, category.id, subCategory.id, brand.id, reviews.id');
+      ]);
 
     // Filter by search term
     if (search) {
@@ -183,42 +175,84 @@ export class ProductsService {
       );
     }
 
-    // Filter by category
-    if (category) {
-      if (typeof category === 'string' && !isNaN(Number(category))) {
-        query.andWhere('category.id = :categoryId', {
-          categoryId: Number(category),
-        });
-      } else {
-        query.andWhere('category.slug = :categorySlug', {
-          categorySlug: category,
-        });
+    // Filter by categories
+    if (categories && categories.length > 0 && categories[0] !== undefined) {
+      const categoryIds = categories
+        .filter((cat) => !isNaN(Number(cat)))
+        .map(Number);
+      const categorySlugs = categories.filter((cat) => isNaN(Number(cat)));
+
+      const conditions: string[] = [];
+      const params: Record<string, any> = {};
+
+      if (categoryIds.length > 0) {
+        conditions.push('category.id IN (:...categoryIds)');
+        params.categoryIds = categoryIds;
+      }
+
+      if (categorySlugs.length > 0) {
+        conditions.push('category.slug IN (:...categorySlugs)');
+        params.categorySlugs = categorySlugs;
+      }
+
+      if (conditions.length > 0) {
+        query.andWhere(`(${conditions.join(' OR ')})`, params);
       }
     }
 
-    // Filter by subcategory
-    if (subcategory) {
-      if (typeof subcategory === 'string' && !isNaN(Number(subcategory))) {
-        query.andWhere('subCategory.id = :subcategoryId', {
-          subcategoryId: Number(subcategory),
-        });
-      } else {
-        query.andWhere('subCategory.slug = :subcategorySlug', {
-          subcategorySlug: subcategory,
-        });
+    // Filter by subcategories
+    if (
+      subcategories &&
+      subcategories.length > 0 &&
+      subcategories[0] !== undefined
+    ) {
+      const subcategoryIds = subcategories
+        .filter((sub) => !isNaN(Number(sub)))
+        .map(Number);
+      const subcategorySlugs = subcategories.filter((sub) =>
+        isNaN(Number(sub)),
+      );
+
+      const conditions: string[] = [];
+      const params: Record<string, any> = {};
+
+      if (subcategoryIds.length > 0) {
+        conditions.push('subCategory.id IN (:...subcategoryIds)');
+        params.subcategoryIds = subcategoryIds;
+      }
+
+      if (subcategorySlugs.length > 0) {
+        conditions.push('subCategory.slug IN (:...subcategorySlugs)');
+        params.subcategorySlugs = subcategorySlugs;
+      }
+
+      if (conditions.length > 0) {
+        query.andWhere(`(${conditions.join(' OR ')})`, params);
       }
     }
 
-    // Filter by brand
-    if (brand) {
-      if (typeof brand === 'string' && !isNaN(Number(brand))) {
-        query.andWhere('brand.id = :brandId', {
-          brandId: Number(brand),
-        });
-      } else {
-        query.andWhere('brand.slug = :brandSlug', {
-          brandSlug: brand,
-        });
+    // Filter by brands
+    if (brands && brands.length > 0 && brands[0] !== undefined) {
+      const brandIds = brands
+        .filter((brand) => !isNaN(Number(brand)))
+        .map(Number);
+      const brandSlugs = brands.filter((brand) => isNaN(Number(brand)));
+
+      const conditions: string[] = [];
+      const params: Record<string, any> = {};
+
+      if (brandIds.length > 0) {
+        conditions.push('brand.id IN (:...brandIds)');
+        params.brandIds = brandIds;
+      }
+
+      if (brandSlugs.length > 0) {
+        conditions.push('brand.slug IN (:...brandSlugs)');
+        params.brandSlugs = brandSlugs;
+      }
+
+      if (conditions.length > 0) {
+        query.andWhere(`(${conditions.join(' OR ')})`, params);
       }
     }
 
@@ -234,23 +268,35 @@ export class ProductsService {
     if (price_lt) query.andWhere('product.price < :price_lt', { price_lt });
     if (price_lte) query.andWhere('product.price <= :price_lte', { price_lte });
 
-    // Filter by rating average
-    if (ratingAverage_gt)
-      query.andHaving('AVG(reviews.rating) > :ratingAverage_gt', {
-        ratingAverage_gt,
-      });
-    if (ratingAverage_gte)
-      query.andHaving('AVG(reviews.rating) >= :ratingAverage_gte', {
-        ratingAverage_gte,
-      });
-    if (ratingAverage_lt)
-      query.andHaving('AVG(reviews.rating) < :ratingAverage_lt', {
-        ratingAverage_lt,
-      });
-    if (ratingAverage_lte)
-      query.andHaving('AVG(reviews.rating) <= :ratingAverage_lte', {
-        ratingAverage_lte,
-      });
+    // For rating filters, we need to modify the query structure
+    if (
+      ratingAverage_gt ||
+      ratingAverage_gte ||
+      ratingAverage_lt ||
+      ratingAverage_lte
+    ) {
+      query
+        .addSelect('AVG(reviews.rating)', 'averageRating')
+        .groupBy('product.id, category.id, subCategory.id, brand.id')
+        .having('AVG(reviews.rating) IS NOT NULL');
+
+      if (ratingAverage_gt)
+        query.andHaving('AVG(reviews.rating) > :ratingAverage_gt', {
+          ratingAverage_gt,
+        });
+      if (ratingAverage_gte)
+        query.andHaving('AVG(reviews.rating) >= :ratingAverage_gte', {
+          ratingAverage_gte,
+        });
+      if (ratingAverage_lt)
+        query.andHaving('AVG(reviews.rating) < :ratingAverage_lt', {
+          ratingAverage_lt,
+        });
+      if (ratingAverage_lte)
+        query.andHaving('AVG(reviews.rating) <= :ratingAverage_lte', {
+          ratingAverage_lte,
+        });
+    }
 
     // Filter by status
     if (!includeInactive) {

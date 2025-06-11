@@ -57,27 +57,13 @@ export class AuthController {
 
   /**
    * @method POST
-   * @route ~/api/auth/app/forgot-password
+   * @route ~/api/auth/forgot-password
    * @access Public
    */
-  @Post('app/forgot-password')
+  @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  appForgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto.email, 'app');
-  }
-
-  /**
-   * @method POST
-   * @route ~/api/auth/dashboard/forgot-password
-   * @access Public
-   */
-  @Post('dashboard/forgot-password')
-  @HttpCode(HttpStatus.OK)
-  dashboardForgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(
-      forgotPasswordDto.email,
-      'dashboard',
-    );
+  ForgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
   }
 
   /**
@@ -86,22 +72,12 @@ export class AuthController {
    * @access Public
    */
   @Post('reset-password')
-  resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-    @Req() request: Request,
-  ) {
-    const fullUrl = `${request.protocol}://${request.get('host')}${request.originalUrl}`;
-
-    return this.authService.resetPassword(
-      resetPasswordDto.userId,
-      resetPasswordDto.token,
-      resetPasswordDto.newPassword,
-      fullUrl,
-    );
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   /**
-   * @method POST
+   * @method GET
    * @route ~/api/auth/verify-email/:id/:verificationToken
    * @access Public
    */
@@ -109,8 +85,9 @@ export class AuthController {
   verifyEmail(
     @Param('id', ParseIntPipe) id: number,
     @Param('verificationToken') verificationToken: string,
+    @Res() res: Response,
   ) {
-    return this.authService.verifyEmail(id, verificationToken);
+    return this.authService.verifyEmail(id, verificationToken, res);
   }
 
   /**
@@ -186,5 +163,16 @@ export class AuthController {
         `${errorRedirect}?error=${encodeURIComponent(errorMessage)}`,
       );
     }
+  }
+
+  /**
+   * @method POST
+   * @route ~/api/auth/refresh-token/:refresh-token
+   * @access Private only user have refresh token
+   */
+  @Post('refresh-token/:refreshToken')
+  @HttpCode(HttpStatus.OK)
+  refreshAccessToken(@Param('refreshToken') refreshToken: string) {
+    return this.authService.refreshAccessToken(refreshToken);
   }
 }

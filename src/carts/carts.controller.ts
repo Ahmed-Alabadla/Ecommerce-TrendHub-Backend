@@ -63,6 +63,21 @@ export class CartsController {
 
   /**
    * @method DELETE
+   * @route ~/api/cart/item/:productId
+   * @access Private [Customer] who created it
+   */
+  @UseGuards(AuthRolesGuard)
+  @Roles(UserType.CUSTOMER)
+  @Delete('item/:productId')
+  removeItem(
+    @Param('productId', ParseIntPipe) productId: number,
+    @CurrentUser() payload: JWTPayload,
+  ) {
+    return this.cartsService.removeItemFromCart(productId, payload.id);
+  }
+
+  /**
+   * @method DELETE
    * @route ~/api/cart
    * @access Private [Customer] who created it
    */
@@ -94,8 +109,6 @@ export class CartsController {
   @Roles(UserType.CUSTOMER)
   @Delete('remove-coupon')
   removeCoupon(@CurrentUser() payload: JWTPayload) {
-    console.log('remove coupon', payload.id);
-
     return this.cartsService.removeCouponFromCart(payload.id);
   }
 }

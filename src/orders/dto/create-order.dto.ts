@@ -1,8 +1,10 @@
-import { IsOptional, IsString, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { ShippingAddressDto } from './ShippingAddressDto ';
 
 export class CreateOrderDto {
-  @IsOptional()
-  @IsString()
-  @MinLength(6)
-  shippingAddress?: string;
+  @ValidateNested()
+  @Type(() => ShippingAddressDto)
+  @IsNotEmpty()
+  shippingAddress: ShippingAddressDto;
 }

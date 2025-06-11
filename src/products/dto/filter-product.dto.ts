@@ -4,6 +4,7 @@ import {
   IsString,
   IsIn,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -22,17 +23,44 @@ export class ProductFilterDto {
   @IsString()
   search?: string;
 
-  @IsOptional()
-  @IsString()
-  category?: string;
+  // @IsOptional()
+  // @IsString()
+  // category?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // subcategory?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // brand?: string;
 
   @IsOptional()
-  @IsString()
-  subcategory?: string;
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return value.split(',');
+    return Array.isArray(value) ? (value as string[]) : [value as string];
+  })
+  categories?: string[];
 
   @IsOptional()
-  @IsString()
-  brand?: string;
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return value.split(',');
+    return Array.isArray(value) ? (value as string[]) : [value as string];
+  })
+  subcategories?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return value.split(',');
+    return Array.isArray(value) ? (value as string[]) : [value as string];
+  })
+  brands?: string[];
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value as string))

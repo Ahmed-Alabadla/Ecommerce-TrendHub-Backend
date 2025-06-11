@@ -47,8 +47,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
     }),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
+      secret: process.env.JWT_SECRET_ACCESS,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN_ACCESS },
     }),
     ThrottlerModule.forRoot({
       throttlers: [
