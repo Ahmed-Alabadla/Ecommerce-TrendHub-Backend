@@ -15,11 +15,11 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Roles } from 'src/users/decorators/user-role.decorator';
-import { PaymentMethod, UserType } from 'src/utils/enums';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { CurrentUser } from 'src/users/decorators/current-user.decorator';
-import { JWTPayload } from 'src/utils/types';
+import { Roles } from '../users/decorators/user-role.decorator';
+import { PaymentMethod, UserType } from '../utils/enums';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
+import { JWTPayload } from '../utils/types';
 import { Request } from 'express';
 
 @Controller('order/checkout')

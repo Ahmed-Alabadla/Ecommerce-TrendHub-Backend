@@ -1,8 +1,8 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { Roles } from 'src/users/decorators/user-role.decorator';
-import { UserType } from 'src/utils/enums';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { Roles } from '../users/decorators/user-role.decorator';
+import { UserType } from '../utils/enums';
 
 @Controller('dashboard')
 export class DashboardController {

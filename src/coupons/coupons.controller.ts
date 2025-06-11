@@ -12,9 +12,9 @@ import {
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
-import { UserType } from 'src/utils/enums';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { Roles } from 'src/users/decorators/user-role.decorator';
+import { UserType } from '../utils/enums';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { Roles } from '../users/decorators/user-role.decorator';
 
 @Controller('coupons')
 @UseGuards(AuthRolesGuard)

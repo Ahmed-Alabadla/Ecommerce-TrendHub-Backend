@@ -1,4 +1,4 @@
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
 import { Order } from './order.entity';
 
 @Entity()

@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { UserType } from 'src/utils/enums';
-import { Roles } from 'src/users/decorators/user-role.decorator';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { UserType } from '../utils/enums';
+import { Roles } from '../users/decorators/user-role.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('settings')

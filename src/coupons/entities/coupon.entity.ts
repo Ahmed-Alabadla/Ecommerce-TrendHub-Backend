@@ -1,5 +1,5 @@
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
-import { CouponType } from 'src/utils/enums';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
+import { CouponType } from '../../utils/enums';
 import {
   Column,
   CreateDateColumn,

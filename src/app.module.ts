@@ -21,7 +21,7 @@ import { OrdersModule } from './orders/orders.module';
 import { StripeModule } from './stripe/stripe.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AppController } from './app.controller';
-import { dataSourceOptions } from 'db/data-source';
+import { dataSourceOptions } from '../db/data-source';
 
 @Module({
   imports: [

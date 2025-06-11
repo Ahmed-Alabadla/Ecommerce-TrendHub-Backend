@@ -10,7 +10,7 @@ import {
   Length,
   MaxDate,
 } from 'class-validator';
-import { GenderType } from 'src/utils/enums';
+import { GenderType } from '../../utils/enums';
 
 export class UpdateUserDto {
   @IsNotEmpty()

@@ -7,10 +7,10 @@ import { CreateCartDto } from './dto/create-cart.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cart } from './entities/cart.entity';
 import { Repository } from 'typeorm';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../products/entities/product.entity';
 import { CartItem } from './entities/cart-item.entity';
-import { CouponType, ProductStatus } from 'src/utils/enums';
-import { Coupon } from 'src/coupons/entities/coupon.entity';
+import { CouponType, ProductStatus } from '../utils/enums';
+import { Coupon } from '../coupons/entities/coupon.entity';
 
 @Injectable()
 export class CartsService {

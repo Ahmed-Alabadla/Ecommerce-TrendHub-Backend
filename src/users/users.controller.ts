@@ -19,10 +19,10 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JWTPayload } from 'src/utils/types';
+import { JWTPayload } from '../utils/types';
 import { AuthRolesGuard } from './guards/auth-roles.guard';
 import { Roles } from './decorators/user-role.decorator';
-import { UserType } from 'src/utils/enums';
+import { UserType } from '../utils/enums';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 

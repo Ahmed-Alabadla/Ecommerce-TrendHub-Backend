@@ -11,7 +11,7 @@ import {
   MaxDate,
   MinLength,
 } from 'class-validator';
-import { GenderType, UserType } from 'src/utils/enums';
+import { GenderType, UserType } from '../../utils/enums';
 
 export class CreateUserDto {
   @IsNotEmpty()

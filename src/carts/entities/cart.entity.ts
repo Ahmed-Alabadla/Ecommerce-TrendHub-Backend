@@ -1,6 +1,6 @@
-import { Coupon } from 'src/coupons/entities/coupon.entity';
-import { User } from 'src/users/entities/user.entity';
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
+import { Coupon } from '../../coupons/entities/coupon.entity';
+import { User } from '../../users/entities/user.entity';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
 import {
   Column,
   CreateDateColumn,

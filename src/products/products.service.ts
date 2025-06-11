@@ -8,12 +8,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
-import { Category } from 'src/categories/entities/category.entity';
-import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
-import { Brand } from 'src/brands/entities/brand.entity';
-import { ProductStatus } from 'src/utils/enums';
+import { Category } from '../categories/entities/category.entity';
+import { SubCategory } from '../sub-categories/entities/sub-category.entity';
+import { Brand } from '../brands/entities/brand.entity';
+import { ProductStatus } from '../utils/enums';
 import { ProductFilterDto } from './dto/filter-product.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductsService {

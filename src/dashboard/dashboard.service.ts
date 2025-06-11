@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brand } from 'src/brands/entities/brand.entity';
-import { Cart } from 'src/carts/entities/cart.entity';
-import { Category } from 'src/categories/entities/category.entity';
-import { Coupon } from 'src/coupons/entities/coupon.entity';
-import { Order } from 'src/orders/entities/order.entity';
-import { Product } from 'src/products/entities/product.entity';
-import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
-import { Supplier } from 'src/suppliers/entities/supplier.entity';
-import { User } from 'src/users/entities/user.entity';
-import { OrderStatus } from 'src/utils/enums';
+import { Brand } from '../brands/entities/brand.entity';
+import { Cart } from '../carts/entities/cart.entity';
+import { Category } from '../categories/entities/category.entity';
+import { Coupon } from '../coupons/entities/coupon.entity';
+import { Order } from '../orders/entities/order.entity';
+import { Product } from '../products/entities/product.entity';
+import { SubCategory } from '../sub-categories/entities/sub-category.entity';
+import { Supplier } from '../suppliers/entities/supplier.entity';
+import { User } from '../users/entities/user.entity';
+import { OrderStatus } from '../utils/enums';
 import { Repository } from 'typeorm';
 
 export interface DashboardStats {

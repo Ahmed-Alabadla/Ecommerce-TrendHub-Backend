@@ -1,6 +1,6 @@
-import { Product } from 'src/products/entities/product.entity';
-import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
+import { Product } from '../../products/entities/product.entity';
+import { SubCategory } from '../../sub-categories/entities/sub-category.entity';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
 import {
   Column,
   CreateDateColumn,

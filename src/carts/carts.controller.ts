@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UserType } from 'src/utils/enums';
-import { Roles } from 'src/users/decorators/user-role.decorator';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { CurrentUser } from 'src/users/decorators/current-user.decorator';
-import { JWTPayload } from 'src/utils/types';
+import { UserType } from '../utils/enums';
+import { Roles } from '../users/decorators/user-role.decorator';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { CurrentUser } from '../users/decorators/current-user.decorator';
+import { JWTPayload } from '../utils/types';
 
 @Controller('cart')
 export class CartsController {

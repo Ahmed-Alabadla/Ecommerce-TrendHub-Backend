@@ -17,9 +17,9 @@ import {
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { Roles } from 'src/users/decorators/user-role.decorator';
-import { UserType } from 'src/utils/enums';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { Roles } from '../users/decorators/user-role.decorator';
+import { UserType } from '../utils/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('brands')

@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Category } from 'src/categories/entities/category.entity';
-import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
-import { Brand } from 'src/brands/entities/brand.entity';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { Category } from '../categories/entities/category.entity';
+import { SubCategory } from '../sub-categories/entities/sub-category.entity';
+import { Brand } from '../brands/entities/brand.entity';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
   imports: [

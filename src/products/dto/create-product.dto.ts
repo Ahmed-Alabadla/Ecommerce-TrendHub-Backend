@@ -10,7 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { ProductStatus } from 'src/utils/enums';
+import { ProductStatus } from '../../utils/enums';
 // import { Dimensions } from '../entities/dimensions.entity';
 import { Transform, Type } from 'class-transformer';
 class Dimensions {

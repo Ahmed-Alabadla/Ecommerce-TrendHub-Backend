@@ -1,4 +1,4 @@
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Cart } from './cart.entity';
-import { Product } from 'src/products/entities/product.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity()
 export class CartItem {

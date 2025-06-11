@@ -1,8 +1,8 @@
-// src/stripe/stripe.service.ts
+// ../../stripe/stripe.service.ts
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Coupon } from 'src/coupons/entities/coupon.entity';
-import { CouponType } from 'src/utils/enums';
+import { Coupon } from '../coupons/entities/coupon.entity';
+import { CouponType } from '../utils/enums';
 import Stripe from 'stripe';
 
 @Injectable()

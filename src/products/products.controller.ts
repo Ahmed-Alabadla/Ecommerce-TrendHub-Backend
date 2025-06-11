@@ -16,9 +16,9 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { AuthRolesGuard } from 'src/users/guards/auth-roles.guard';
-import { UserType } from 'src/utils/enums';
-import { Roles } from 'src/users/decorators/user-role.decorator';
+import { AuthRolesGuard } from '../users/guards/auth-roles.guard';
+import { UserType } from '../utils/enums';
+import { Roles } from '../users/decorators/user-role.decorator';
 import { ProductFilterDto } from './dto/filter-product.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 

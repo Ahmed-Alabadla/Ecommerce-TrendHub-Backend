@@ -10,20 +10,20 @@ import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
 import {
   GoogleUserType,
   JWTPayload,
   RefreshTokenPayload,
-} from 'src/utils/types';
+} from '../utils/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { Request, Response } from 'express';
-import { generateRandomPassword } from 'src/utils/util';
-import { UserType } from 'src/utils/enums';
+import { generateRandomPassword } from '../utils/util';
+import { UserType } from '../utils/enums';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()

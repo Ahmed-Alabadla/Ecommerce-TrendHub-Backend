@@ -1,8 +1,8 @@
-import { Brand } from 'src/brands/entities/brand.entity';
-import { Category } from 'src/categories/entities/category.entity';
-import { SubCategory } from 'src/sub-categories/entities/sub-category.entity';
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
-import { ProductStatus } from 'src/utils/enums';
+import { Brand } from '../../brands/entities/brand.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { SubCategory } from '../../sub-categories/entities/sub-category.entity';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
+import { ProductStatus } from '../../utils/enums';
 import {
   Column,
   CreateDateColumn,
@@ -13,7 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Dimensions } from './dimensions.entity';
-import { Review } from 'src/reviews/entities/review.entity';
+import { Review } from '../../reviews/entities/review.entity';
 
 @Entity({ name: 'products' })
 export class Product {

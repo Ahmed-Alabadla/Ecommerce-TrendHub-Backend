@@ -9,8 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UserType } from 'src/utils/enums';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { UserType } from '../utils/enums';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {

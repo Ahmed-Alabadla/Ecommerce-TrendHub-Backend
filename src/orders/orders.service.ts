@@ -6,18 +6,18 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderStatus, OrderStatusCash, PaymentMethod } from 'src/utils/enums';
+import { OrderStatus, OrderStatusCash, PaymentMethod } from '../utils/enums';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { OrderItem } from './entities/order-item.entity';
-import { Cart } from 'src/carts/entities/cart.entity';
-import { Setting } from 'src/settings/entities/setting.entity';
-import { Product } from 'src/products/entities/product.entity';
-import { CartItem } from 'src/carts/entities/cart-item.entity';
-import { StripeService } from 'src/stripe/stripe.service';
+import { Cart } from '../carts/entities/cart.entity';
+import { Setting } from '../settings/entities/setting.entity';
+import { Product } from '../products/entities/product.entity';
+import { CartItem } from '../carts/entities/cart-item.entity';
+import { StripeService } from '../stripe/stripe.service';
 import Stripe from 'stripe';
-import { MailService } from 'src/mail/mail.service';
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);

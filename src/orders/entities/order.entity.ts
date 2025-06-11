@@ -1,6 +1,6 @@
-import { User } from 'src/users/entities/user.entity';
-import { CURRENT_TIMESTAMP } from 'src/utils/constants';
-import { OrderStatus, PaymentMethod } from 'src/utils/enums';
+import { User } from '../../users/entities/user.entity';
+import { CURRENT_TIMESTAMP } from '../../utils/constants';
+import { OrderStatus, PaymentMethod } from '../../utils/enums';
 import {
   Column,
   CreateDateColumn,

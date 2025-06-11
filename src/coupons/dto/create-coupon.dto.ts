@@ -10,7 +10,7 @@ import {
   Min,
   MinDate,
 } from 'class-validator';
-import { CouponType } from 'src/utils/enums';
+import { CouponType } from '../../utils/enums';
 
 export class CreateCouponDto {
   @IsString()

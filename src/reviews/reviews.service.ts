@@ -9,11 +9,11 @@ import { UpdateReviewDto } from './dto/update-review.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { Product } from 'src/products/entities/product.entity';
+import { User } from '../users/entities/user.entity';
+import { Product } from '../products/entities/product.entity';
 import { ReviewFilterDto } from './dto/review-filter.dto';
-import { JWTPayload } from 'src/utils/types';
-import { UserType } from 'src/utils/enums';
+import { JWTPayload } from '../utils/types';
+import { UserType } from '../utils/enums';
 
 @Injectable()
 export class ReviewsService {

@@ -8,10 +8,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { JWTPayload } from 'src/utils/types';
-import { CURRENT_USER_KEY } from 'src/utils/constants';
+import { JWTPayload } from '../../utils/types';
+import { CURRENT_USER_KEY } from '../../utils/constants';
 import { Reflector } from '@nestjs/core';
-import { UserType } from 'src/utils/enums';
+import { UserType } from '../../utils/enums';
 import { ROLES_KEY } from '../decorators/user-role.decorator';
 import { UsersService } from '../users.service';
 

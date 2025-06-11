@@ -6,8 +6,8 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Order } from 'src/orders/entities/order.entity';
-import { Setting } from 'src/settings/entities/setting.entity';
+import { Order } from '../orders/entities/order.entity';
+import { Setting } from '../settings/entities/setting.entity';
 
 @Injectable()
 export class MailService {
