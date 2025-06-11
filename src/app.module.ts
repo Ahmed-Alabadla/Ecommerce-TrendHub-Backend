@@ -1,7 +1,7 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -21,6 +21,7 @@ import { OrdersModule } from './orders/orders.module';
 import { StripeModule } from './stripe/stripe.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AppController } from './app.controller';
+import { dataSourceOptions } from 'db/data-source';
 
 @Module({
   imports: [
@@ -28,24 +29,29 @@ import { AppController } from './app.controller';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          type: 'postgres',
-          username: config.get<string>('DB_USERNAME'),
-          password: config.get<string>('DB_PASSWORD'),
-          database: config.get<string>('DB_DATABASE'),
-          host: config.get<string>('DB_HOST'),
-          port: config.get<number>('DB_PORT'),
-          synchronize: process.env.NODE_ENV !== 'production',
-          entities: ['dist/**/*.entity{.ts,.js}'],
-          // entities: [Product, User, Review],
-          logging: true, // enable logging
-          logger: 'advanced-console', // more detailed logging
-        };
-      },
-    }),
+    // LOCAL DATABASE CONFIGURATION
+    // TypeOrmModule.forRootAsync({
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => {
+    //     return {
+    //       type: 'postgres',
+    //       username: config.get<string>('DB_USERNAME'),
+    //       password: config.get<string>('DB_PASSWORD'),
+    //       database: config.get<string>('DB_DATABASE'),
+    //       host: config.get<string>('DB_HOST'),
+    //       port: config.get<number>('DB_PORT'),
+    //       synchronize: process.env.NODE_ENV !== 'production',
+    //       entities: ['dist/**/*.entity{.ts,.js}'],
+    //       // entities: [Product, User, Review],
+    //       logging: true, // enable logging
+    //       logger: 'advanced-console', // more detailed logging
+    //     };
+    //   },
+    // }),
+
+    // REMOTE DATABASE CONFIGURATION
+    TypeOrmModule.forRoot(dataSourceOptions),
+
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET_ACCESS,
