@@ -13,8 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -34,19 +33,39 @@ export class CategoriesController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Post()
   create(
     @Body() createCategoryDto: CreateCategoryDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({
-            fileType: /^image\/(jpeg|jpg|png|gif|webp)$/,
-          }), // More specific
-        ],
         fileIsRequired: true,
+        exceptionFactory: () => {
+          return new BadRequestException('Image file is required');
+        },
       }),
     )
     file: Express.Multer.File,
@@ -81,19 +100,36 @@ export class CategoriesController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({
-            fileType: /^image\/(jpeg|jpg|png|gif|webp)$/,
-          }), // More specific
-        ],
         fileIsRequired: false,
       }),
     )

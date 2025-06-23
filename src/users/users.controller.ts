@@ -37,16 +37,35 @@ export class AdminUsersController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Post()
   create(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
-        ],
         fileIsRequired: false,
       }),
     )
@@ -109,17 +128,36 @@ export class AdminUsersController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
-        ],
         fileIsRequired: false,
       }),
     )

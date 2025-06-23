@@ -11,8 +11,6 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
   BadRequestException,
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
@@ -64,6 +62,9 @@ export class BrandsController {
     @UploadedFile(
       new ParseFilePipe({
         fileIsRequired: true,
+        exceptionFactory: () => {
+          return new BadRequestException('Image file is required');
+        },
       }),
     )
     file: Express.Multer.File,

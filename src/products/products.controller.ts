@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   BadRequestException,
+  ParseFilePipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -67,10 +68,17 @@ export class ProductsController {
   @Post()
   create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFiles()
+    @UploadedFiles(
+      new ParseFilePipe({
+        fileIsRequired: true,
+        exceptionFactory: () => {
+          return new BadRequestException('Image file is required');
+        },
+      }),
+    )
     files: {
-      imageCover?: Express.Multer.File[];
-      images?: Express.Multer.File[];
+      imageCover: Express.Multer.File[];
+      images: Express.Multer.File[];
     },
   ) {
     return this.productsService.create(
