@@ -13,6 +13,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
@@ -33,18 +34,35 @@ export class BrandsController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Post()
   create(
     @Body() createBrandDto: CreateBrandDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({
-            fileType: '.(jpeg|jpg|png|gif|webp)$',
-          }), // More specific
-        ],
         fileIsRequired: true,
       }),
     )
@@ -80,19 +98,36 @@ export class BrandsController {
    */
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB
+      },
+      fileFilter: (req, file, cb) => {
+        const validTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/jpg',
+        ];
+        if (validTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(`Invalid file type: ${file.mimetype}`),
+            false,
+          );
+        }
+      },
+    }),
+  )
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBrandDto: UpdateBrandDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({
-            fileType: '.(jpeg|jpg|png|gif|webp)$',
-          }), // More specific
-        ],
         fileIsRequired: false,
       }),
     )

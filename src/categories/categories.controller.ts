@@ -42,7 +42,9 @@ export class CategoriesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+          new FileTypeValidator({
+            fileType: /^image\/(jpeg|jpg|png|gif|webp)$/,
+          }), // More specific
         ],
         fileIsRequired: true,
       }),
@@ -88,7 +90,9 @@ export class CategoriesController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
+          new FileTypeValidator({
+            fileType: /^image\/(jpeg|jpg|png|gif|webp)$/,
+          }), // More specific
         ],
         fileIsRequired: false,
       }),
