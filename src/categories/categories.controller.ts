@@ -44,10 +44,10 @@ export class CategoriesController {
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
           new FileTypeValidator({ fileType: /^image\/(jpeg|png|gif|webp)$/ }), // More specific
         ],
-        fileIsRequired: false,
+        fileIsRequired: true,
       }),
     )
-    file?: Express.Multer.File,
+    file: Express.Multer.File,
   ) {
     return this.categoriesService.create(createCategoryDto, file);
   }

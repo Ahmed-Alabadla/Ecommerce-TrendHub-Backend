@@ -42,7 +42,7 @@ export class BrandsController {
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
           new FileTypeValidator({
-            fileType: 'image/(jpeg|png|gif|jpg|webp)',
+            fileType: '.(jpeg|jpg|png|gif|webp)$',
           }), // More specific
         ],
         fileIsRequired: true,
@@ -89,7 +89,9 @@ export class BrandsController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
-          new FileTypeValidator({ fileType: 'image/(jpeg|png|gif|jpg|webp)' }),
+          new FileTypeValidator({
+            fileType: '.(jpeg|jpg|png|gif|webp)$',
+          }), // More specific
         ],
         fileIsRequired: false,
       }),
